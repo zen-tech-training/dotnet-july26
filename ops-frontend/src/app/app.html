@@ -1,0 +1,15 @@
+<!-- filepath: src/app/app.html -->
+<main class="main">
+  <div class="content">
+    <div class="left-side">
+      <h1>Hello, {{ title() }}</h1>
+      <p>Congratulations! Your app is running.</p>
+    </div>
+    <hr />
+    <div class="divider" role="separator" aria-label="Divider">
+      <app-get-data-from-api></app-get-data-from-api>
+
+    </div>    
+  </div>
+</main>
+<router-outlet />

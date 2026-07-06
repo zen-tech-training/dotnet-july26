@@ -13,12 +13,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500")
+        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:4200")
             //"file:///D:/Projects/DotNetProjects/1July26-Pool/ops-frontend/basics/")
              //policy.WithOrigins("http://127.0.0.1:5500") // Replace with your EXACT frontend URL (No trailing slash)
              //policy.AllowAnyOrigin()
              .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();  // Required to read the HttpOnly cookie from /v4Get
     });
 });
 
@@ -54,7 +55,8 @@ app.MapGet("/v4Get", (HttpContext context) =>
     CookieOptions options = new CookieOptions
     {
         HttpOnly = true,       // Prevents JavaScript from reading the cookie (protects against XSS)
-        Secure = true,         // Ensures cookie is only sent over HTTPS
+        //Secure = true,         // Ensures cookie is only sent over HTTPS
+        Secure = false,        // http://localhost:4200
         SameSite = SameSiteMode.Lax, // Allows cookie to be sent on standard cross-site navigations
         Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Cookie lifespan
     };
@@ -63,7 +65,7 @@ app.MapGet("/v4Get", (HttpContext context) =>
     context.Response.Cookies.Append("MyUserToken", "SecureValue123", options);
 
     // 3. Return your JSON payload
-    return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String" });
+    return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
 });
 
 

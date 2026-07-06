@@ -1,6 +1,54 @@
+# ==================================================
+# Backend (.NET) & OS Rules
+# ==================================================
 bin/
 obj/
 .vs/
 *.user
 *.dll
 *.exe
+.DS_Store
+Thumbs.db
+
+# ==================================================
+# Frontend (Angular) Rules
+# ==================================================
+# Node modules and package locks
+ops-frontend/node_modules/
+ops-frontend/package-lock.json
+
+# Compiled output
+ops-frontend/dist/
+ops-frontend/tmp/
+ops-frontend/out-tsc/
+ops-frontend/bazel-out/
+
+# Cache and logs
+ops-frontend/.angular/cache/
+ops-frontend/.sass-cache/
+ops-frontend/connect.lock
+ops-frontend/coverage/
+ops-frontend/libpeerconnection.log
+ops-frontend/testem.log
+ops-frontend/typings/
+ops-frontend/__screenshots__/
+ops-frontend/npm-debug.log
+ops-frontend/yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.history/*
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
