@@ -1,3 +1,5 @@
+//ops-frontend/src/app/app.config.ts
+
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';

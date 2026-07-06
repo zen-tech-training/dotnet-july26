@@ -1,3 +1,5 @@
+//File path: ops-frontend/src/app/app.ts
+
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { GetDataFromAPI } from './component/get-data-from-api/get-data-from-api';

@@ -1,3 +1,4 @@
+//ops-frontend/src/app/component/get-data-from-api/get-data-from-api.ts
 
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
