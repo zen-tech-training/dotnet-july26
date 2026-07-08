@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/notes/">
+    <File Path="ops-backend-implementation-steps.txt" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Ops.API/Ops.API.csproj" />
   </Folder>

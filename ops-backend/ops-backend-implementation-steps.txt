@@ -1,0 +1,1836 @@
+﻿I am building an enterprise Order Processing Solution using Angular (latest), ASP.NET Core Web API 10, Entity Framework, and MS SQL Server. The application streamlines flows for suppliers, products, and customers with features like product search, ordering, transactions, cancellations, refunds, and reviews. 
+Right now, I just need the backend logic. It must be scalable and enterprise-ready, featuring at least 10 tables, table alterations, 10 rows of seed data per table, indexes, views, stored procedures, functions, and triggers. Please also incorporate advanced SQL topics like CTEs and DENSE_RANK().
+
+I am using 
+DotNet 10.0
+SQL Server 2025
+
+In backend application I need below concepts to be covered:
+1. Model and Validations - Model with Data annotations, DTOs, Fluent API, Fluent Validations and seed data, EF CRUD operations
+2. Logger - Request and Error logger
+3. Problem Details
+4. Global level exception handling
+5. API Rate limiter
+6. JWT authentication, Access Token, Refresh Token
+7. Cookies, (Sessions if required)
+8. Pagination
+9. Memoization
+10. API Versioning
+11. Call to Raw SQL query
+12. Bulk insertion &/or updating operations (around 2 lakh rows simultaneously)
+13. Call to Stored procedure, Views
+and some more 
+
+
+But right now I just want one 'Product' entity/model, and the CRUD operation for this.
+
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26
+
+git clone https://github.com/________/dotnet-july26.git
+
+cd dotnet-july26
+md ops-backend
+cd ops-backend
+md src
+md tests
+
+
+dotnet new sln -n dotnet-july26-solution  // creates dotnet-july26-solution.slnx file in dotnet 10 version
+
+
+============
+
+dotnet new gitignore
+
+Modify gitignore file
+bin/
+obj/
+.vs/
+*.user
+*.dll
+*.exe
+
+
+======
+create ASP.NET Core Web API project - Ops.API
+
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
+dotnet new webapi -n Ops.API --use-controllers
+cd..
+dotnet sln add src\Ops.API\Ops.API.csproj
+
+cd src\Ops.API
+
+
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+dotnet add package Microsoft.EntityFrameworkCore.Design
+
+dotnet add package Swashbuckle.AspNetCore
+
+=================================
+
+cd src
+
+2) Shared project
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
+
+dotnet new classlib -n Ops.Shared
+cd ..
+dotnet sln add src\Ops.Shared\Ops.Shared.csproj
+
+3) Core Domain Layer (Entities)
+dotnet new classlib -n Ops.Domain
+
+4) Application Layer (DTOs, Interfaces & Service Interfaces, AutoMapper)
+dotnet new classlib -n Ops.Application
+
+5) Infrastructure Layer (EF Core, Unit of Work Implementation)
+dotnet new classlib -n Ops.Infrastructure
+
+6) xunit Project:
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
+
+cd tests
+
+dotnet new xunit -n Ops.UnitTests
+dotnet new xunit -n Ops.IntegrationTests
+
+cd ..
+dotnet sln add tests/Ops.UnitTests/Ops.UnitTests.csproj
+dotnet sln add tests/Ops.IntegrationTests/Ops.IntegrationTests.csproj
+
+
+
+
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\
+dotnet sln add src\Ops.Domain\Ops.Domain.csproj
+dotnet sln add src\Ops.Application\Ops.Application.csproj
+dotnet sln add src\Ops.Infrastructure\Ops.Infrastructure.csproj
+
+=================================
+7A) Console project is just for learning purpose
+
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
+dotnet new console -n Ops.CSharpBasics  
+cd..
+dotnet sln add src\Ops.CSharpBasics\Ops.CSharpBasics.csproj
+
+==================================
+7B) Webapp MVC project is just for learning purpose
+
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
+dotnet new mvc -n webapp
+cd..
+dotnet sln add src\webapp\webapp.csproj
+
+
+============
+8) Azure Function Project
+c:\> npm install -g azure-functions-core-tools@4 --unsafe-perm true
+
+c:\> func --version
+
+Install Azure CLI
+c:\> az --version
+
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
+
+func init Order.Functions --worker-runtime dotnet-isolated
+
+cd ..
+dotnet sln add src\Order.Functions\Order_Functions.csproj         ------- Here underscore is present
+
+(Or - dotnet sln add src\Order.Functions\Order.Functions.csproj)
+
+OR
+dotnet sln add **/*.csproj 
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+cd src\Order.Functions
+dotnet add package Microsoft.Azure.Functions.Worker
+
+dotnet add package Microsoft.Azure.Functions.Worker.Sdk
+
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Storage
+
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.ServiceBus
+
+dotnet add package Azure.Storage.Blobs
+
+dotnet add package Azure.Identity
+
+dotnet add package Azure.Security.KeyVault.Secrets
+
+dotnet add package Microsoft.ApplicationInsights.WorkerService
+
+dotnet add package Microsoft.Azure.Functions.Worker.ApplicationInsights
+
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+
+<PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.8.0" />
+
+
+
+Step 4 Create Azure Function
+Create
+OrderCreatedFunction.cs
+
+public class OrderCreatedFunction
+{
+    [Function("OrderCreated")]
+    public async Task Run(
+        [ServiceBusTrigger("orders")]
+        string message)
+    {
+        Console.WriteLine(message);
+    }
+}
+
+========================================================================
+
+## Recommended Solution Structure
+
+ops-backend
+│
+├── src
+│   │
+│   ├── Ops.API                    --> Entry Point to access the backend solution, Presentation Layer
+│   │
+│   ├── Ops.Application            --> Business Logic
+│   │
+│   ├── Ops.Domain                 --> Domain Model
+│   │
+│   ├── Ops.Infrastructure         --> Database, Repository
+│   │
+│   └── Ops.Shared                 --> Common Classes
+│
+└── tests
+    │
+    ├── Ops.UnitTests
+    │
+    └── Ops.IntegrationTests
+
+
+---
+
+# Dependency Flow
+Register services through DI.
+
+API
+ |
+Application
+ |
+Domain
+
+
+Infrastructure
+  |
+implements interfaces of Application
+
+
+
+
+Notice
+
+Domain never depends on Infrastructure.
+
+Application never depends on API.
+
+Infrastructure depends on Application & Domain.
+Infrastructure should implement interfaces defined inside Application.
+
+API depends on Application & Infrastructure.
+Not necessarily wrong, but avoid directly using Infrastructure everywhere.
+
+
+This is exactly how most enterprise applications are structured.
+
+
+Domain
+Application -> Domain
+Infrastructure -> Application + Domain
+API -> Application
+
+
+Project Reference:
+Ops.API
+    -> Ops.Application
+
+Ops.Infrastructure
+    -> Ops.Application
+    -> Ops.Domain
+
+Ops.Application
+    -> Ops.Domain
+
+
+-----------------------------------------------------------------------
+
+# Project 1
+
+# Ops.Domain
+
+Contains only business objects.
+
+Ops.Domain
+│
+├── Entities
+│      Product.cs
+│      Order.cs
+│      OrderItem.cs
+│      Customer.cs
+│
+├── Enums
+│      OrderStatus.cs ("Placed", "In-Progress", "Dispatched", "Delivered", "Rejected")
+│      HttpStatus.cs ()
+│
+│
+├── Common
+│      BaseEntity.cs
+│      AuditableEntity.cs
+│
+└── ValueObjects
+│
+├── Events  (Useful when later integrating: Azure Service Bus, RabbitMQ, Azure Functions)
+│      OrderCreatedEvent
+│      OrderCancelled
+│      PaymentCompleted
+
+
+
+Example
+BaseEntity
+
+Id
+CreatedOn
+CreatedBy
+UpdatedOn
+UpdatedBy
+IsDeleted (useful for Soft delete, Audit trails, Recovery, Legal compliance)
+
+
+Every entity inherits BaseEntity.
+
+Example
+
+Product : BaseEntity
+
+Id
+Name
+Price
+Stock
+
+---
+
+# Ops.Application
+
+This contains business logic.
+
+DTOs doesn't map your database.
+Entities maps tables of database. To perform CRUD, we need entities, the reason is, we use EF framework.
+ER diagram - Entity Relationship diagram
+
+65 columns in my one database table.
+Incoming DTO - RequestDTO - 20 key value pairs
+Outgoing DTO - ResponseDTO - 40 columns
+
+
+Why do we create DTOs inside Application project?
+
+Ops.Application
+│
+├── DTOs
+│
+│    For Product entity: 
+│        ProductDto.cs
+│        CreateProductDto.cs
+│        UpdateProductDto.cs
+│        ProductResponseDto.cs
+│        ProductListDto.cs
+│
+
+├── Interfaces (Is it good to move these interfaces to Ops.Application/Interfaces project)
+│      IRepository.cs
+│      IUnitOfWork.cs
+│      IOrderRepository.cs
+│      IProductRepository.cs
+│      IProductService.cs
+│      IOrderService.cs
+│
+├── Services
+│      ProductService.cs
+│      OrderService.cs
+│
+├── Validators 
+    (we will use 3 approaches:
+	1. Data annotations- simple constraints, simple validation - Implementation will happen inside the Entity class
+	2. Fluent API - DBContext -complex constraints like foreign key, complex validation - Implementation will happen inside the ApplicationDBContext class
+	3. Fluent Validation - all types of validations - Implementation will happen inside the Entity/DTOValidator class)
+│      CreateProductValidator.cs - 
+│
+├── Mapping
+│      AutoMapperProfile.cs
+│
+├── Features
+│
+│     Product
+│         Commands
+│         Queries
+│
+└── Exceptions
+
+Notice
+
+DTOs never go inside Domain.
+
+Entities stay in Domain.
+
+---
+
+# Ops.Infrastructure
+
+Contains everything related to SQL Server.
+
+Ops.Infrastructure
+│
+├── Data
+│      ApplicationDbContext.cs
+│
+├── Configurations
+│      ProductConfiguration.cs
+│      OrderConfiguration.cs
+│
+├── Repository
+│      GenericRepository.cs
+│      ProductRepository.cs
+│      OrderRepository.cs
+│
+├── UnitOfWork
+│      UnitOfWork.cs
+│
+├── Identity
+│      JwtService.cs
+│
+├── Authentication
+│
+├── Authorization
+│
+├── Migrations
+│
+└── DependencyInjection.cs
+
+
+Here lives EF Core.
+
+---
+
+# Ops.API
+
+Ops.API
+│
+├── Controllers
+│      ProductController.cs
+│      OrderController.cs
+│      AuthController.cs
+│
+├── Middleware
+│      ExceptionMiddleware.cs
+│      LoggingMiddleware.cs
+│
+├── Extensions
+│      ServiceCollectionExtensions.cs
+│
+├── Filters
+│
+├── appsettings.json
+│
+└── Program.cs
+
+---
+
+# Ops.Shared
+
+Ops.Shared
+│
+├── Constants
+│
+├── Helpers
+│
+├── Exceptions
+│
+├── Response
+│      ApiResponse.cs
+│      PagedResponse.cs
+│
+└── Utilities
+
+---
+
+# Model Validation
+
+I recommend using both.
+
+## 1 Data Annotation
+
+Simple validation - Just for learning purpose. Not applicable.
+
+Note:
+Simple validation can use DataAnnotations.
+Complex business validation should use FluentValidation.
+
+
+
+public class CreateProductDto
+{
+    [Required]
+
+    [StringLength(100)]
+
+    public string Name { get; set; }
+
+    [Range(1,100000)]
+
+    public decimal Price { get; set; }
+}
+
+---
+
+## 2 Fluent Validation
+
+Complex validation.
+
+Product name already exists
+
+Price > 0
+
+Stock >= 0
+
+Category exists
+
+SKU unique
+
+FluentValidation is much cleaner.
+
+---
+
+# Entity Configuration
+
+Don't configure inside DbContext.
+
+Create
+
+```
+Configurations
+
+ProductConfiguration
+
+OrderConfiguration
+
+CustomerConfiguration
+```
+
+Use
+
+```
+IEntityTypeConfiguration<T>
+```
+
+This is the industry standard.
+
+---
+
+# AutoMapper
+
+Create
+
+```
+Mapping
+
+AutoMapperProfile.cs
+```
+
+```
+Product
+
+↓
+
+ProductDto
+
+↓
+
+CreateProductDto
+
+↓
+
+UpdateProductDto
+```
+
+---
+
+# Generic Repository
+
+```
+IGenericRepository<T>
+
+Add()
+
+Update()
+
+Delete()
+
+GetAll()
+
+GetById()
+
+Find()
+
+Exists()
+
+Count()
+```
+
+Implementation
+
+```
+GenericRepository<T>
+```
+
+---
+
+# Specific Repository
+
+```
+IProductRepository
+
+↓
+
+ProductRepository
+```
+
+Extra methods
+
+```
+GetLowStockProducts()
+
+SearchProducts()
+
+GetProductBySKU()
+```
+
+---
+
+# Unit Of Work
+
+```
+IUnitOfWork
+
+↓
+
+UnitOfWork
+```
+
+Contains
+
+```
+Products
+
+Orders
+
+Customers
+
+SaveAsync()
+```
+
+Example
+
+```
+_unitOfWork.Products.Add(product);
+
+_unitOfWork.SaveAsync();
+```
+
+---
+
+# Authentication
+
+I recommend JWT Authentication.
+
+Folder
+
+```
+Authentication
+
+JwtService
+
+JwtSettings
+
+JwtTokenGenerator
+```
+
+Database
+
+```
+Users
+
+Roles
+
+RefreshTokens
+```
+
+---
+
+# Authorization
+
+```
+Admin
+
+Manager
+
+Customer
+```
+
+Use
+
+```
+[Authorize]
+
+[Authorize(Roles="Admin")]
+
+[Authorize(Policy="CanCreateOrder")]
+```
+
+---
+
+# Middleware
+
+Create
+
+```
+ExceptionMiddleware
+
+LoggingMiddleware
+
+RequestResponseLoggingMiddleware
+
+PerformanceMiddleware
+```
+
+---
+
+# Logging
+
+Use
+
+```
+ILogger
+```
+
+Later integrate
+
+```
+Serilog
+
+Seq
+
+Azure Application Insights
+```
+
+---
+
+# API Response
+
+Don't return raw objects.
+
+Always use
+
+```
+ApiResponse<T>
+
+Success
+
+Message
+
+Data
+
+Errors
+```
+
+Example
+
+```
+{
+    "success": true,
+    "message": "Product created successfully",
+    "data": { }
+}
+```
+
+---
+
+# Pagination
+
+Create
+
+```
+PagedRequest
+
+PageNumber
+
+PageSize
+```
+
+Response
+
+```
+PagedResponse<T>
+```
+
+---
+
+# Exception Handling
+
+Create custom exceptions.
+
+```
+NotFoundException
+
+ValidationException
+
+BadRequestException
+
+UnauthorizedException
+```
+
+Handle them in global middleware.
+
+---
+
+# Tests
+
+```
+tests
+
+Ops.UnitTests
+
+ProductServiceTests
+
+OrderServiceTests
+
+--------------------------
+
+Ops.IntegrationTests
+
+ProductControllerTests
+
+OrderControllerTests
+```
+
+---
+
+# NuGet Packages
+
+| Project        | Packages                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| Domain         | None                                                                                        |
+| Application    | AutoMapper, FluentValidation, MediatR (optional)                                            |
+| Infrastructure | EF Core, SQL Server, Identity, JWT, Serilog                                                 |
+| API            | Swagger, FluentValidation.AspNetCore (or manual integration), Authentication, Authorization |
+
+## Complete Learning Roadmap
+
+I suggest we build this project exactly as it would be developed in a professional team, one step at a time. The sequence would be:
+
+1. Create project references and install NuGet packages.
+2. Build the Domain layer (entities, enums, repository interfaces, Unit of Work interface).
+3. Build the Infrastructure layer (DbContext, entity configurations with Fluent API, repositories, Unit of Work, migrations).
+4. Build the Application layer (DTOs, AutoMapper profiles, FluentValidation validators, services).
+5. Configure Dependency Injection.
+6. Create Product CRUD APIs.
+7. Add JWT authentication and role-based authorization.
+8. Build the Order Processing workflow (Customers → Products → Orders → Order Items).
+9. Add global exception handling, logging, pagination, filtering, and API versioning.
+10. Write unit tests and integration tests.
+11. Containerize with Docker and prepare for Azure deployment.
+12. Set up a CI/CD pipeline using GitHub Actions and Azure.
+
+This progression mirrors how many enterprise ASP.NET Core applications are built and will give you experience with patterns and practices commonly discussed in senior .NET interviews.
+
+
+===========================================================================
+
+
+Product CRUD
+│
+├── BaseEntity
+├── Product Entity
+├── DTOs
+├── Repository
+├── Generic Repository
+├── Product Repository
+├── Unit Of Work
+├── DbContext
+├── Fluent API
+├── Data Annotation
+├── Fluent Validation
+├── AutoMapper
+├── Service Layer
+├── Dependency Injection
+├── Controller
+├── SQL Server Migration
+├── Swagger Testing
+
+===========================================================================
+
+# ASP.NET Core 10 Order Processing System
+
+## Step 1 - Create Project References
+
+First, let's connect all the projects.
+
+From the solution folder execute:
+
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
+
+dotnet add src\Ops.Application\Ops.Application.csproj reference src\Ops.Domain\Ops.Domain.csproj
+
+dotnet add src\Ops.Infrastructure\Ops.Infrastructure.csproj reference src\Ops.Domain\Ops.Domain.csproj
+
+dotnet add src\Ops.Infrastructure\Ops.Infrastructure.csproj reference src\Ops.Application\Ops.Application.csproj
+
+dotnet add src\Ops.API\Ops.API.csproj reference src\Ops.Application\Ops.Application.csproj
+
+dotnet add src\Ops.API\Ops.API.csproj reference src\Ops.Infrastructure\Ops.Infrastructure.csproj
+
+
+# Verify
+
+Run
+dotnet build
+
+Build should succeed.
+
+---
+
+# Step 2 Install NuGet Packages
+
+## Domain
+No packages.
+
+---
+
+## Application
+
+cd src\Ops.Application
+
+dotnet add package AutoMapper
+dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection
+dotnet add package FluentValidation
+
+---
+
+## Infrastructure
+
+cd ..\Ops.Infrastructure
+
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+dotnet add package Microsoft.EntityFrameworkCore.Design
+
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+```
+
+---
+
+## API
+cd ..\Ops.API
+
+dotnet add package Swashbuckle.AspNetCore
+
+dotnet add package FluentValidation.AspNetCore
+
+Later we'll install:
+
+* JWT
+* Identity
+* Serilog
+* Authentication
+* Authorization
+
+when required.
+
+---
+
+# Step 3 Create Folder Structure
+
+## Ops.Domain
+
+Ops.Domain
+
+├── Common
+├── Entities
+├── Enums
+
+---
+
+## Ops.Application
+
+├── DTOs
+│      └── Product
+│
+├── Interfaces
+│
+├── Mapping
+│
+├── Services
+│
+├── Validators
+│      └── Product
+
+---
+
+## Ops.Infrastructure
+
+├── Configurations
+├── Data
+├── Repositories
+├── UnitOfWork
+
+
+---
+
+## API
+
+Ops.API
+
+├── Controllers
+├── Extensions
+├── Middleware
+
+
+============================================= Domain =====================
+
+src/Ops.Domain/Common/BaseEntity.cs
+
+src/Ops.Domain/Entities/Product.cs
+
+
+
+
+# Step 4 Create BaseEntity
+
+File path: Ops.Domain/Common/BaseEntity.cs
+
+namespace Ops.Domain.Common;
+
+public abstract class BaseEntity
+{
+    public int Id { get; set; }
+
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    public string? CreatedBy { get; set; }
+
+    public DateTime? UpdatedDate { get; set; }
+
+    public string? UpdatedBy { get; set; }
+
+    public bool IsDeleted { get; set; }
+}
+
+
+---
+
+# Why BaseEntity?
+
+Every table in the system will inherit these common audit fields.
+
+Product
+Customer
+Order
+OrderItem
+Category
+Supplier
+
+All inherit BaseEntity
+
+
+# Step 5 Create Product Entity
+
+Inside Entities folder
+
+
+Create Ops.Domain.Entities\Product.cs
+
+Wrong Approach ------------
+
+using System.ComponentModel.DataAnnotations;
+using Ops.Domain.Common;
+namespace Ops.Domain.Entities;
+public class Product : BaseEntity
+{
+    [Required]
+    [MaxLength(100)]
+    public string Name { get; set; } = string.Empty;
+
+    [MaxLength(500)]
+    public string? Description { get; set; }
+
+    [Range(0.01, 1000000)]
+    public decimal Price { get; set; }
+
+    [Range(0, 100000)]
+    public int StockQuantity { get; set; }
+
+    [Required]
+    [MaxLength(50)]
+    public string SKU { get; set; } = string.Empty;
+
+    [Timestamp]
+    public byte[] RowVersion { get; set; }
+}
+
+Correct Approach ----------
+
+using Ops.Domain.Common;
+namespace Ops.Domain.Entities;
+public class Product : BaseEntity
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public int StockQuantity { get; set; }
+    public string SKU { get; set; } = string.Empty;
+}
+
+Validation belongs inside:
+CreateProductValidator
+UpdateProductValidator
+and Fluent API.
+
+==================
+
+======================================= Application
+
+src/Ops.Application/DTOs/Product/CreateProductDto.cs
+
+src/Ops.Application/DTOs/Product/UpdateProductDto.cs
+
+src/Ops.Application/DTOs/Product/ProductPatchDto.cs
+
+src/Ops.Application/Validators/Product/CreateProductValidator.cs
+
+src/Ops.Application/Validators/Product/UpdateProductValidator.cs
+
+src/Ops.Application/Mapping/AutoMapperProfile.cs
+
+src/Ops.Application/Services/ProductService.cs
+
+src/Ops.Application/Interfaces/IProductRepository.cs
+
+src/Ops.Application/Interfaces/IGenericRepository.cs
+
+src/Ops.Application/Interfaces/IUnitOfWork.cs
+
+
+
+src/Ops.Application/Interfaces/IProductService.cs
+
+
+=================
+
+File path: src/Ops.Application/Validators/Product/CreateProductValidator.cs
+
+using FluentValidation;
+using Ops.Application.DTOs.Product;
+
+namespace Ops.Application.Validators.Product;
+
+public class CreateProductValidator : AbstractValidator<CreateProductDto>
+{
+    public CreateProductValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(100);
+
+        RuleFor(x => x.Description)
+            .MaximumLength(500);
+
+        RuleFor(x => x.Price)
+            .GreaterThan(0);
+
+        RuleFor(x => x.StockQuantity)
+            .GreaterThanOrEqualTo(0);
+
+        RuleFor(x => x.SKU)
+            .NotEmpty()
+            .MaximumLength(50);
+    }
+}
+
+=================
+
+File path: src/Ops.Application/Validators/Product/UpdateProductValidator.cs
+
+using FluentValidation;
+using Ops.Application.DTOs.Product;
+
+namespace Ops.Application.Validators.Product;
+
+public class UpdateProductValidator : AbstractValidator<UpdateProductDto>
+{
+    public UpdateProductValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MaximumLength(100);
+
+        RuleFor(x => x.Description)
+            .MaximumLength(500);
+
+        RuleFor(x => x.Price)
+            .GreaterThan(0);
+
+        RuleFor(x => x.StockQuantity)
+            .GreaterThanOrEqualTo(0);
+
+        RuleFor(x => x.SKU)
+            .NotEmpty()
+            .MaximumLength(50);
+    }
+}
+
+
+=============
+
+
+File path: src/Ops.Application/Interfaces/IGenericRepository.cs
+
+namespace Ops.Application.Interfaces;
+
+public interface IGenericRepository<T> where T : class
+{
+    Task<IEnumerable<T>> GetAllAsync();
+
+    Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken);
+
+    Task AddAsync(T entity, CancellationToken cancellationToken);
+
+    void Update(T entity, CancellationToken cancellationToken);
+
+    void Delete(T entity, CancellationToken cancellationToken);
+}
+
+
+Note: We need to add te below methods in the later release.
+Task<bool> ExistsAsync(...)
+Task<int> CountAsync(...)
+Task<IEnumerable<T>> FindAsync(...)
+Task AddRangeAsync(...)
+Task DeleteRangeAsync(...)
+================
+File path: src/Ops.Application/Interfaces/IProductRepository.cs
+
+
+using Ops.Domain.Entities;
+
+namespace Ops.Application.Interfaces;
+
+public interface IProductRepository : IGenericRepository<Product>
+{
+    Task<Product?> GetBySkuAsync(string sku);
+}
+
+=================
+
+Fie path: src/Ops.Application/Interfaces/IUnitOfWork.cs
+
+
+namespace Ops.Application.Interfaces;
+
+public interface IUnitOfWork
+{
+    IProductRepository Products { get; }
+
+    Task<int> SaveAsync();
+
+    void Dispose();
+}
+
+
+===================================== Infrastructure
+
+src/Ops.Infrastructure/Data/ApplicationDbContext.cs
+
+src/Ops.Infrastructure/Configurations/ProductConfiguration.cs
+
+src/Ops.Infrastructure/Repositories/GenericRepository.cs
+
+src/Ops.Infrastructure/Repositories/ProductRepository.cs
+
+src/Ops.Infrastructure/UnitOfWork/UnitOfWork.cs
+
+src/Ops.Infrastructure/DependencyInjection.cs
+
+
+=========== File path : src/Ops.Infrastructure/Data/ApplicationDbContext.cs
+
+
+using Microsoft.EntityFrameworkCore;
+using Ops.Domain.Entities;
+
+namespace Ops.Infrastructure.Data;
+
+public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options)
+        : base(options)
+    {
+    }
+
+    public DbSet<Product> Products => Set<Product>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(ApplicationDbContext).Assembly);
+
+        base.OnModelCreating(modelBuilder);
+    }
+}
+
+================ Fluent API Configuration - 
+File path: src/Ops.Infrastructure/Configurations/ProductConfiguration.cs
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Ops.Domain.Entities;
+
+namespace Ops.Infrastructure.Configurations;
+
+public class ProductConfiguration : IEntityTypeConfiguration<Product>
+{
+    public void Configure(EntityTypeBuilder<Product> builder)
+    {
+        builder.ToTable("Products");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Name)
+               .HasMaxLength(100)
+               .IsRequired();
+
+        builder.Property(x => x.Description)
+               .HasMaxLength(500);
+
+        builder.Property(x => x.Price)
+               .HasColumnType("decimal(18,2)");
+
+        builder.Property(x => x.SKU)
+               .HasMaxLength(50)
+               .IsRequired();
+
+        builder.HasIndex(x => x.SKU)
+               .IsUnique();
+
+        builder.HasData(
+            new Product
+            {
+                Id = 1,
+                Name = "Laptop",
+                Description = "Dell Laptop",
+                Price = 55000,
+                StockQuantity = 20,
+                SKU = "LAP001"
+            },
+            new Product
+            {
+                Id = 2,
+                Name = "Mouse",
+                Description = "Wireless Mouse",
+                Price = 800,
+                StockQuantity = 100,
+                SKU = "MOU001"
+            }
+        );
+    }
+}
+
+==============
+
+File path: src/Ops.Infrastructure/Repositories/GenericRepository.cs
+
+using Microsoft.EntityFrameworkCore;
+using Ops.Application.Interfaces;
+using Ops.Infrastructure.Data;
+
+namespace Ops.Infrastructure.Repositories;
+
+public class GenericRepository<T> : IGenericRepository<T>
+    where T : class
+{
+    protected readonly ApplicationDbContext _context;
+    protected readonly DbSet<T> _dbSet;
+
+    public GenericRepository(ApplicationDbContext context)
+    {
+        _context = context;
+        _dbSet = _context.Set<T>();
+    }
+
+    public async Task<IEnumerable<T>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
+
+    public async Task<T?> GetByIdAsync(int id)
+    {
+        return await _dbSet.FindAsync(id);
+    }
+
+    public async Task AddAsync(T entity)
+    {
+        await _dbSet.AddAsync(entity);
+    }
+
+    public void Update(T entity)
+    {
+        _dbSet.Update(entity);
+    }
+
+    public void Delete(T entity)
+    {
+        _dbSet.Remove(entity);
+    }
+}
+
+
+==================
+
+File path: src/Ops.Infrastructure/Repositories/ProductRepository.cs
+
+
+using Microsoft.EntityFrameworkCore;
+using Ops.Domain.Entities;
+using Ops.Application.Interfaces;
+using Ops.Infrastructure.Data;
+
+namespace Ops.Infrastructure.Repositories;
+
+public class ProductRepository
+    : GenericRepository<Product>,
+      IProductRepository
+{
+    public ProductRepository(ApplicationDbContext context)
+        : base(context)
+    {
+    }
+
+    public async Task<Product?> GetBySkuAsync(string sku)
+    {
+        return await _context.Products
+            .FirstOrDefaultAsync(x => x.SKU == sku);
+    }
+}
+
+
+
+============== 
+File Path: src/Ops.Infrastructure/UnitOfWork/UnitOfWork.cs
+
+using Ops.Application.Interfaces;
+using Ops.Infrastructure.Data;
+
+namespace Ops.Infrastructure.UnitOfWork;
+
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly ApplicationDbContext _context;
+
+    public IProductRepository Products { get; }
+
+    public UnitOfWork(
+        ApplicationDbContext context,
+        IProductRepository productRepository)
+    {
+        _context = context;
+        Products = productRepository;
+    }
+
+    public async Task<int> SaveAsync()
+    {
+        return await _context.SaveChangesAsync();
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+}
+
+============== 
+File Path: Ops.Infrastructure/DependencyInjection.cs
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Ops.Application.Interfaces;
+using Ops.Infrastructure.Data;
+using Ops.Infrastructure.Repositories;
+using Ops.Infrastructure.UnitOfWork;
+
+namespace Ops.Infrastructure;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"));
+        });
+
+        services.AddScoped(
+            typeof(IGenericRepository<>),
+            typeof(GenericRepository<>));
+
+        services.AddScoped<IProductRepository,
+                           ProductRepository>();
+
+        services.AddScoped<IUnitOfWork,
+                           UnitOfWork>();
+
+        return services;
+    }
+}
+
+============== DTOs - CreateProductDto
+
+public class CreateProductDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public int StockQuantity { get; set; }
+    public string SKU { get; set; } = string.Empty;
+}
+
+
+UpdateProductDto.cs
+
+public class UpdateProductDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal Price { get; set; }
+    public int StockQuantity { get; set; }
+    public string SKU { get; set; } = string.Empty;
+}
+
+PATCH DTO
+public class ProductPatchDto
+{
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public decimal? Price { get; set; }
+    public int? StockQuantity { get; set; }
+    public string? SKU { get; set; }
+}
+
+============== Repository Interface
+
+
+
+public interface IProductRepository 
+{
+    Task<IEnumerable<Product>> GetAllAsync();
+    Task<Product?> GetByIdAsync(int id);
+    Task AddAsync(Product product);
+    void Update(Product product);
+    void Delete(Product product);
+}
+
+
+Note: Improvement is required as follows:
+public interface IProductRepository : IGenericRepository<Product>
+
+
+================================================= API
+
+src/Ops.API/Controllers/ProductsController.cs
+
+src/Ops.API/Program.cs
+
+src/Ops.API/appsettings.json
+
+
+
+============== Ops.API/appSettings.json 
+
+"ConnectionStrings": {
+  "DefaultConnection": "Server=Your_DB_Server_Name;Database=DB_Name;Trusted_Connection=True;Encrypt=False;"
+}
+
+
+"DefaultConnection": "Server=TALW42NLPC2783\\MSSQLSERVER_NEW;Database=opsdb_july26;Trusted_Connection=True;Encrypt=False;"
+
+
+============== Migration Commands - Install tool:
+dotnet tool install --global dotnet-ef
+
+Create Migration:
+
+dotnet ef migrations has-pending-model-changes -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
+
+
+dotnet ef migrations add InitialCreate ^
+--project src/Ops.Infrastructure ^
+--startup-project src/Ops.API
+
+
+Apply Migration:
+
+dotnet ef database update ^
+--project src/Ops.Infrastructure ^
+--startup-project src/Ops.API
+
+To List:
+dotnet ef migrations list -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
+
+
+Remove Migration:
+
+dotnet ef migrations remove ^
+--project src/Ops.Infrastructure ^
+--startup-project src/Ops.API
+
+
+============== Controller CRUD + PATCH
+
+File path: src/Ops.API/Controllers/ProductsController.cs
+`
+
+using Microsoft.AspNetCore.Mvc;
+using Ops.Application.DTOs.Product;
+using Ops.Domain.Entities;
+using Ops.Application.Interfaces;
+
+namespace Ops.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class ProductsController : ControllerBase
+{
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ProductsController(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var products =
+            await _unitOfWork.Products.GetAllAsync();
+
+        return Ok(productDto);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        var product =
+            await _unitOfWork.Products.GetByIdAsync(id);
+
+        if (product == null)
+            return NotFound();
+
+        //return Ok(product);
+	return Ok(productDto);	
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        CreateProductDto dto)
+    {
+
+	//Need Automapper - _mapper.Map<Product>(dto);
+        var product = new Product
+        {
+            Name = dto.Name,
+            Description = dto.Description,
+            Price = dto.Price,
+            StockQuantity = dto.StockQuantity,
+            SKU = dto.SKU
+        };
+
+        await _unitOfWork.Products.AddAsync(product);
+
+        await _unitOfWork.SaveAsync();
+
+        return CreatedAtAction(
+            nameof(Get),
+            new { id = product.Id },
+            product //Return DTO
+       );
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+        int id,
+        UpdateProductDto dto)
+    {
+        var product =
+            await _unitOfWork.Products.GetByIdAsync(id);
+
+        if (product == null)
+            return NotFound();
+
+        product.Name = dto.Name;
+        product.Description = dto.Description;
+        product.Price = dto.Price;
+        product.StockQuantity = dto.StockQuantity;
+        product.SKU = dto.SKU;
+
+        _unitOfWork.Products.Update(product);
+
+        await _unitOfWork.SaveAsync();
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> Patch(
+        int id,
+        ProductPatchDto dto)
+    {
+        var product =
+            await _unitOfWork.Products.GetByIdAsync(id);
+
+        if (product == null)
+            return NotFound();
+
+        if (dto.Name != null)    // Prefer JsonPatchDocument<ProductPatchDto>
+            product.Name = dto.Name;
+
+        if (dto.Description != null)
+            product.Description = dto.Description;
+
+        if (dto.Price.HasValue)
+            product.Price = dto.Price.Value;
+
+        if (dto.StockQuantity.HasValue)
+            product.StockQuantity = dto.StockQuantity.Value;
+
+        if (dto.SKU != null)
+            product.SKU = dto.SKU;
+
+        _unitOfWork.Products.Update(product);
+
+        await _unitOfWork.SaveAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var product =
+            await _unitOfWork.Products.GetByIdAsync(id);
+
+        if (product == null)
+            return NotFound();
+
+        _unitOfWork.Products.Delete(product);
+
+        await _unitOfWork.SaveAsync();
+
+        return NoContent();
+    }
+}
+============== 
+File path: src/Ops.API/Program.cs
+
+
+
+
+using Microsoft.EntityFrameworkCore;
+using Ops.Infrastructure.Data;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddProblemDetails(); //Exception middleware
+
+
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint(
+            "/swagger/v1/swagger.json",
+            "Ops API V1");
+
+        options.RoutePrefix = string.Empty;
+    });
+}
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+=======================================================
+
+# Build the Solution
+
+From the solution folder:
+
+dotnet build
+
+The build should succeed with no errors.
+
+---
+
+* Configuring `Product` with Fluent API (`IEntityTypeConfiguration<Product>`)
+* Configuring the SQL Server connection string
+
+===========================================================================
+cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
+dotnet build
+
+port https:6004, http:6005
+
+cd src/Ops.API
+dotnet run --urls "https://localhost:6004"
