@@ -74,10 +74,7 @@ cd src
 
 2) Shared project
 cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
-
 dotnet new classlib -n Ops.Shared
-cd ..
-dotnet sln add src\Ops.Shared\Ops.Shared.csproj
 
 3) Core Domain Layer (Entities)
 dotnet new classlib -n Ops.Domain
@@ -91,28 +88,29 @@ dotnet new classlib -n Ops.Infrastructure
 6) xunit Project:
 cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
 
-cd tests
+7) CSharp Basics
+dotnet new console -n Ops.CSharpBasics
 
+cd tests
 dotnet new xunit -n Ops.UnitTests
 dotnet new xunit -n Ops.IntegrationTests
 
-cd ..
-dotnet sln add tests/Ops.UnitTests/Ops.UnitTests.csproj
-dotnet sln add tests/Ops.IntegrationTests/Ops.IntegrationTests.csproj
-
-
-
-
 cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\
+
+dotnet sln add src\Ops.Shared\Ops.Shared.csproj
 dotnet sln add src\Ops.Domain\Ops.Domain.csproj
 dotnet sln add src\Ops.Application\Ops.Application.csproj
 dotnet sln add src\Ops.Infrastructure\Ops.Infrastructure.csproj
+dotnet sln add src\Ops.CSharpBasics\Ops.CSharpBasics.csproj
+
+dotnet sln add tests\Ops.UnitTests\Ops.UnitTests.csproj
+dotnet sln add tests/Ops.IntegrationTests/Ops.IntegrationTests.csproj
 
 =================================
 7A) Console project is just for learning purpose
 
 cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
-dotnet new console -n Ops.CSharpBasics  
+  
 cd..
 dotnet sln add src\Ops.CSharpBasics\Ops.CSharpBasics.csproj
 
