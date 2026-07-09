@@ -73,7 +73,6 @@ dotnet add package Swashbuckle.AspNetCore
 cd src
 
 2) Shared project
-cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
 dotnet new classlib -n Ops.Shared
 
 3) Core Domain Layer (Entities)
@@ -85,15 +84,18 @@ dotnet new classlib -n Ops.Application
 5) Infrastructure Layer (EF Core, Unit of Work Implementation)
 dotnet new classlib -n Ops.Infrastructure
 
-6) xunit Project:
-cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
-
-7) CSharp Basics
+6) CSharp Basics
 dotnet new console -n Ops.CSharpBasics
 
+7) Webapp MVC project is just for learning purpose
+dotnet new mvc -n webapp
+cd..
+
+8 & 9) xunit projects
 cd tests
 dotnet new xunit -n Ops.UnitTests
 dotnet new xunit -n Ops.IntegrationTests
+cd..
 
 cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\
 
@@ -102,29 +104,14 @@ dotnet sln add src\Ops.Domain\Ops.Domain.csproj
 dotnet sln add src\Ops.Application\Ops.Application.csproj
 dotnet sln add src\Ops.Infrastructure\Ops.Infrastructure.csproj
 dotnet sln add src\Ops.CSharpBasics\Ops.CSharpBasics.csproj
-
-dotnet sln add tests\Ops.UnitTests\Ops.UnitTests.csproj
-dotnet sln add tests/Ops.IntegrationTests/Ops.IntegrationTests.csproj
-
-=================================
-7A) Console project is just for learning purpose
-
-cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
-  
-cd..
-dotnet sln add src\Ops.CSharpBasics\Ops.CSharpBasics.csproj
-
-==================================
-7B) Webapp MVC project is just for learning purpose
-
-cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src
-dotnet new mvc -n webapp
-cd..
 dotnet sln add src\webapp\webapp.csproj
 
+dotnet sln add tests\Ops.UnitTests\Ops.UnitTests.csproj
+dotnet sln add tests\Ops.IntegrationTests\Ops.IntegrationTests.csproj
 
-============
-8) Azure Function Project
+==================================
+
+10) Azure Function Project
 c:\> npm install -g azure-functions-core-tools@4 --unsafe-perm true
 
 c:\> func --version
@@ -174,8 +161,8 @@ dotnet add package Microsoft.EntityFrameworkCore.SqlServer
 
 
 
-Step 4 Create Azure Function
-Create
+Step : Create Azure Function
+
 OrderCreatedFunction.cs
 
 public class OrderCreatedFunction
@@ -206,6 +193,8 @@ ops-backend
 │   ├── Ops.Infrastructure         --> Database, Repository
 │   │
 │   └── Ops.Shared                 --> Common Classes
+│   │
+│   └── Ops.CSharpBasics           --> CSharp Basics Concepts
 │
 └── tests
     │
@@ -882,32 +871,16 @@ Product CRUD
 ├── SQL Server Migration
 ├── Swagger Testing
 
-===========================================================================
-
-# ASP.NET Core 10 Order Processing System
-
-## Step 1 - Create Project References
-
-First, let's connect all the projects.
-
-From the solution folder execute:
-
-cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
+=========================================================================== Step 2 - Create Project References and Install Packages
+cd D:\1-Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
 
 dotnet add src\Ops.Application\Ops.Application.csproj reference src\Ops.Domain\Ops.Domain.csproj
-
 dotnet add src\Ops.Infrastructure\Ops.Infrastructure.csproj reference src\Ops.Domain\Ops.Domain.csproj
-
 dotnet add src\Ops.Infrastructure\Ops.Infrastructure.csproj reference src\Ops.Application\Ops.Application.csproj
-
 dotnet add src\Ops.API\Ops.API.csproj reference src\Ops.Application\Ops.Application.csproj
-
 dotnet add src\Ops.API\Ops.API.csproj reference src\Ops.Infrastructure\Ops.Infrastructure.csproj
 
-
-# Verify
-
-Run
+# Verify and Run:
 dotnet build
 
 Build should succeed.
@@ -919,36 +892,23 @@ Build should succeed.
 ## Domain
 No packages.
 
----
-
 ## Application
 
 cd src\Ops.Application
-
 dotnet add package AutoMapper
 dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection
 dotnet add package FluentValidation
 
----
-
 ## Infrastructure
 
 cd ..\Ops.Infrastructure
-
 dotnet add package Microsoft.EntityFrameworkCore.SqlServer
-
 dotnet add package Microsoft.EntityFrameworkCore.Design
-
 dotnet add package Microsoft.EntityFrameworkCore.Tools
-```
-
----
 
 ## API
 cd ..\Ops.API
-
 dotnet add package Swashbuckle.AspNetCore
-
 dotnet add package FluentValidation.AspNetCore
 
 Later we'll install:
@@ -961,9 +921,7 @@ Later we'll install:
 
 when required.
 
----
-
-# Step 3 Create Folder Structure
+=========================================================================== Step 3 Create Folder Structures
 
 ## Ops.Domain
 
@@ -973,8 +931,6 @@ Ops.Domain
 ├── Entities
 ├── Enums
 
----
-
 ## Ops.Application
 
 ├── DTOs
@@ -982,35 +938,31 @@ Ops.Domain
 │
 ├── Interfaces
 │
-├── Mapping
+├── Mapping (We have to use, It is pending)
 │
-├── Services
+├── Services  (Not used)
 │
 ├── Validators
 │      └── Product
-
----
 
 ## Ops.Infrastructure
 
 ├── Configurations
 ├── Data
 ├── Repositories
-├── UnitOfWork
-
-
----
+├── UnitOfWork.cs
+├── DependencyInjection.cs
 
 ## API
 
 Ops.API
 
-├── Controllers
+├── Controllers (Already exist)
 ├── Extensions
 ├── Middleware
 
 
-============================================= Domain =====================
+=========================================================================== Step 4: Domain
 
 src/Ops.Domain/Common/BaseEntity.cs
 
@@ -1019,29 +971,20 @@ src/Ops.Domain/Entities/Product.cs
 
 
 
-# Step 4 Create BaseEntity
+# Step 4.1 Create BaseEntity
 
 File path: Ops.Domain/Common/BaseEntity.cs
 
 namespace Ops.Domain.Common;
-
 public abstract class BaseEntity
 {
     public int Id { get; set; }
-
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
     public string? CreatedBy { get; set; }
-
     public DateTime? UpdatedDate { get; set; }
-
     public string? UpdatedBy { get; set; }
-
     public bool IsDeleted { get; set; }
 }
-
-
----
 
 # Why BaseEntity?
 
@@ -1057,14 +1000,11 @@ Supplier
 All inherit BaseEntity
 
 
-# Step 5 Create Product Entity
-
-Inside Entities folder
-
+# Step 4.2 Create Product Entity
 
 Create Ops.Domain.Entities\Product.cs
 
-Wrong Approach ------------
+Traditional Approach (Wrong)------------
 
 using System.ComponentModel.DataAnnotations;
 using Ops.Domain.Common;
@@ -1092,7 +1032,7 @@ public class Product : BaseEntity
     public byte[] RowVersion { get; set; }
 }
 
-Correct Approach ----------
+Recommended Approach (Correct) ----------
 
 using Ops.Domain.Common;
 namespace Ops.Domain.Entities;
@@ -1110,9 +1050,7 @@ CreateProductValidator
 UpdateProductValidator
 and Fluent API.
 
-==================
-
-======================================= Application
+=========================================================================== Step 5: Application
 
 src/Ops.Application/DTOs/Product/CreateProductDto.cs
 
@@ -1124,104 +1062,75 @@ src/Ops.Application/Validators/Product/CreateProductValidator.cs
 
 src/Ops.Application/Validators/Product/UpdateProductValidator.cs
 
-src/Ops.Application/Mapping/AutoMapperProfile.cs
+src/Ops.Application/Mapping/AutoMapperProfile.cs  (Need implementation)
 
-src/Ops.Application/Services/ProductService.cs
-
-src/Ops.Application/Interfaces/IProductRepository.cs
+src/Ops.Application/Services/ProductService.cs (Need implementation, I think it is not required. )
 
 src/Ops.Application/Interfaces/IGenericRepository.cs
 
+src/Ops.Application/Interfaces/IProductRepository.cs
+
 src/Ops.Application/Interfaces/IUnitOfWork.cs
 
+src/Ops.Application/Interfaces/IProductService.cs (Need implementation, I think it is not required. May be required for business Logic)
 
 
-src/Ops.Application/Interfaces/IProductService.cs
+===
+============== DTOs - CreateProductDto
 
-
-=================
-
-File path: src/Ops.Application/Validators/Product/CreateProductValidator.cs
-
-using FluentValidation;
-using Ops.Application.DTOs.Product;
-
-namespace Ops.Application.Validators.Product;
-
-public class CreateProductValidator : AbstractValidator<CreateProductDto>
+namespace Ops.Application.DTOs.Product
 {
-    public CreateProductValidator()
+    public class CreateProductDto
     {
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .MaximumLength(100);
-
-        RuleFor(x => x.Description)
-            .MaximumLength(500);
-
-        RuleFor(x => x.Price)
-            .GreaterThan(0);
-
-        RuleFor(x => x.StockQuantity)
-            .GreaterThanOrEqualTo(0);
-
-        RuleFor(x => x.SKU)
-            .NotEmpty()
-            .MaximumLength(50);
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public decimal Price { get; set; }
+        public int StockQuantity { get; set; }
+        public string SKU { get; set; } = string.Empty;
     }
 }
 
-=================
-
-File path: src/Ops.Application/Validators/Product/UpdateProductValidator.cs
-
-using FluentValidation;
-using Ops.Application.DTOs.Product;
-
-namespace Ops.Application.Validators.Product;
-
-public class UpdateProductValidator : AbstractValidator<UpdateProductDto>
+====
+namespace Ops.Application.DTOs.Product
 {
-    public UpdateProductValidator()
+    public class UpdateProductDto
     {
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .MaximumLength(100);
-
-        RuleFor(x => x.Description)
-            .MaximumLength(500);
-
-        RuleFor(x => x.Price)
-            .GreaterThan(0);
-
-        RuleFor(x => x.StockQuantity)
-            .GreaterThanOrEqualTo(0);
-
-        RuleFor(x => x.SKU)
-            .NotEmpty()
-            .MaximumLength(50);
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public decimal Price { get; set; }
+        public int StockQuantity { get; set; }
+        public string SKU { get; set; } = string.Empty;
     }
 }
 
+====
 
-=============
+namespace Ops.Application.DTOs.Product
+{
+    public class ProductPatchDto
+    {
+        public string? Name { get; set; }
+        public string? Description { get; set; }
+        public decimal? Price { get; set; }
+        public int? StockQuantity { get; set; }
+        public string? SKU { get; set; }
+    }
+}
 
+====
 
 File path: src/Ops.Application/Interfaces/IGenericRepository.cs
 
-namespace Ops.Application.Interfaces;
-
-public interface IGenericRepository<T> where T : class
+namespace Ops.Application.Interfaces
 {
-    Task<IEnumerable<T>> GetAllAsync();
-
-    Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken);
-
-    Task AddAsync(T entity, CancellationToken cancellationToken);
-
-    void Update(T entity, CancellationToken cancellationToken);
-
-    void Delete(T entity, CancellationToken cancellationToken);
+    public interface IGenericRepository<T> where T : class
+    {
+        Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken);
+        Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken);
+        Task AddAsync(T entity, CancellationToken cancellationToken);
+        void Update(T entity, CancellationToken cancellationToken);
+        void Delete(T entity, CancellationToken cancellationToken);
+    }
 }
 
 
@@ -1231,37 +1140,119 @@ Task<int> CountAsync(...)
 Task<IEnumerable<T>> FindAsync(...)
 Task AddRangeAsync(...)
 Task DeleteRangeAsync(...)
-================
-File path: src/Ops.Application/Interfaces/IProductRepository.cs
 
+========
+File path: src/Ops.Application/Interfaces/IProductRepository.cs
 
 using Ops.Domain.Entities;
 
-namespace Ops.Application.Interfaces;
-
-public interface IProductRepository : IGenericRepository<Product>
+namespace Ops.Application.Interfaces
 {
-    Task<Product?> GetBySkuAsync(string sku);
+    public interface IProductRepository : IGenericRepository<Product>
+    {
+        Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken);
+    }
 }
 
-=================
+========
 
 Fie path: src/Ops.Application/Interfaces/IUnitOfWork.cs
 
-
-namespace Ops.Application.Interfaces;
-
-public interface IUnitOfWork
+namespace Ops.Application.Interfaces
 {
-    IProductRepository Products { get; }
+    public interface IUnitOfWork
+    {
+        IProductRepository Products { get; }
+        Task<int> SaveAsync();
+        void Dispose();
+    }
+}
 
-    Task<int> SaveAsync();
+===========
 
-    void Dispose();
+File path: src/Ops.Application/Validators/Product/CreateProductValidator.cs
+
+using FluentValidation;
+using Ops.Application.DTOs.Product;
+
+namespace Ops.Application.Validators.Product
+{
+    public class CreateProductValidator : AbstractValidator<CreateProductDto>
+    {
+        public CreateProductValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.Description)
+                .MaximumLength(500);
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0);
+
+            RuleFor(x => x.StockQuantity)
+                .GreaterThanOrEqualTo(0);
+
+            RuleFor(x => x.SKU)
+                .NotEmpty()
+                .MaximumLength(50);
+        }
+    }
 }
 
 
-===================================== Infrastructure
+=================
+
+File path: src/Ops.Application/Validators/Product/UpdateProductValidator.cs
+
+using FluentValidation;
+using Ops.Application.DTOs.Product;
+
+namespace Ops.Application.Validators.Product
+{
+    public class UpdateProductValidator : AbstractValidator<UpdateProductDto>
+    {
+        public UpdateProductValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.Description)
+                .MaximumLength(500);
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0);
+
+            RuleFor(x => x.StockQuantity)
+                .GreaterThanOrEqualTo(0);
+
+            RuleFor(x => x.SKU)
+                .NotEmpty()
+                .MaximumLength(50);
+        }
+    }
+}
+
+
+
+
+File : Ops\Application\DTOs\Product\ProductDto.cs
+
+namespace Ops.Application.DTOs.Product
+{
+    public class ProductDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public decimal Price { get; set; }
+        public int StockQuantity { get; set; }
+        public string SKU { get; set; } = string.Empty;
+    }
+}
+=========================================================================== Step 5: Infrastructure
 
 src/Ops.Infrastructure/Data/ApplicationDbContext.cs
 
@@ -1282,24 +1273,25 @@ src/Ops.Infrastructure/DependencyInjection.cs
 using Microsoft.EntityFrameworkCore;
 using Ops.Domain.Entities;
 
-namespace Ops.Infrastructure.Data;
-
-public class ApplicationDbContext : DbContext
+namespace Ops.Infrastructure.Data
 {
-    public ApplicationDbContext(
-        DbContextOptions<ApplicationDbContext> options)
-        : base(options)
+    public class ApplicationDbContext : DbContext
     {
-    }
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
 
-    public DbSet<Product> Products => Set<Product>();
+        public DbSet<Product> Products => Set<Product>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ApplyConfigurationsFromAssembly(
-            typeof(ApplicationDbContext).Assembly);
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(
+                typeof(ApplicationDbContext).Assembly);
 
-        base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
 
@@ -1310,55 +1302,58 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ops.Domain.Entities;
 
-namespace Ops.Infrastructure.Configurations;
 
-public class ProductConfiguration : IEntityTypeConfiguration<Product>
+namespace Ops.Infrastructure.Configurations
 {
-    public void Configure(EntityTypeBuilder<Product> builder)
+    public class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
-        builder.ToTable("Products");
+        public void Configure(EntityTypeBuilder<Product> builder)
+        {
+            builder.ToTable("Products");
 
-        builder.HasKey(x => x.Id);
+            builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Name)
-               .HasMaxLength(100)
-               .IsRequired();
+            builder.Property(x => x.Name)
+                   .HasMaxLength(100)
+                   .IsRequired();
 
-        builder.Property(x => x.Description)
-               .HasMaxLength(500);
+            builder.Property(x => x.Description)
+                   .HasMaxLength(500);
 
-        builder.Property(x => x.Price)
-               .HasColumnType("decimal(18,2)");
+            builder.Property(x => x.Price)
+                   .HasColumnType("decimal(18,2)");
 
-        builder.Property(x => x.SKU)
-               .HasMaxLength(50)
-               .IsRequired();
+            builder.Property(x => x.SKU)
+                   .HasMaxLength(50)
+                   .IsRequired();
 
-        builder.HasIndex(x => x.SKU)
-               .IsUnique();
+            builder.HasIndex(x => x.SKU)
+                   .IsUnique();
 
-        builder.HasData(
-            new Product
-            {
-                Id = 1,
-                Name = "Laptop",
-                Description = "Dell Laptop",
-                Price = 55000,
-                StockQuantity = 20,
-                SKU = "LAP001"
-            },
-            new Product
-            {
-                Id = 2,
-                Name = "Mouse",
-                Description = "Wireless Mouse",
-                Price = 800,
-                StockQuantity = 100,
-                SKU = "MOU001"
-            }
-        );
+            builder.HasData(
+                new Product
+                {
+                    Id = 1,
+                    Name = "Laptop",
+                    Description = "Dell Laptop",
+                    Price = 55000,
+                    StockQuantity = 20,
+                    SKU = "LAP001"
+                },
+                new Product
+                {
+                    Id = 2,
+                    Name = "Mouse",
+                    Description = "Wireless Mouse",
+                    Price = 800,
+                    StockQuantity = 100,
+                    SKU = "MOU001"
+                }
+            );
+        }
     }
 }
+
 
 ==============
 
@@ -1367,45 +1362,50 @@ File path: src/Ops.Infrastructure/Repositories/GenericRepository.cs
 using Microsoft.EntityFrameworkCore;
 using Ops.Application.Interfaces;
 using Ops.Infrastructure.Data;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Ops.Infrastructure.Repositories;
-
-public class GenericRepository<T> : IGenericRepository<T>
-    where T : class
+namespace Ops.Infrastructure.Repositories
 {
-    protected readonly ApplicationDbContext _context;
-    protected readonly DbSet<T> _dbSet;
-
-    public GenericRepository(ApplicationDbContext context)
+    public class GenericRepository<T> : IGenericRepository<T>
+    where T : class
     {
-        _context = context;
-        _dbSet = _context.Set<T>();
+        protected readonly ApplicationDbContext _context;
+        protected readonly DbSet<T> _dbSet;
+
+        public GenericRepository(ApplicationDbContext context)
+        {
+            _context = context;
+            _dbSet = _context.Set<T>();
+        }
+
+        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken) // Modify IGenericRepository.GetAllAsync(CancellationToken  )
+        {
+            return await _dbSet.ToListAsync();
+        }
+
+        public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public async Task AddAsync(T entity, CancellationToken cancellationToken)
+        {
+            await _dbSet.AddAsync(entity);
+        }
+
+        public void Update(T entity, CancellationToken cancellationToken)
+        {
+            _dbSet.Update(entity);
+        }
+
+        public void Delete(T entity, CancellationToken cancellationToken)
+        {
+            _dbSet.Remove(entity);
+        }
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync()
-    {
-        return await _dbSet.ToListAsync();
-    }
-
-    public async Task<T?> GetByIdAsync(int id)
-    {
-        return await _dbSet.FindAsync(id);
-    }
-
-    public async Task AddAsync(T entity)
-    {
-        await _dbSet.AddAsync(entity);
-    }
-
-    public void Update(T entity)
-    {
-        _dbSet.Update(entity);
-    }
-
-    public void Delete(T entity)
-    {
-        _dbSet.Remove(entity);
-    }
 }
 
 
@@ -1415,62 +1415,64 @@ File path: src/Ops.Infrastructure/Repositories/ProductRepository.cs
 
 
 using Microsoft.EntityFrameworkCore;
-using Ops.Domain.Entities;
 using Ops.Application.Interfaces;
+using Ops.Domain.Entities;
 using Ops.Infrastructure.Data;
 
-namespace Ops.Infrastructure.Repositories;
-
-public class ProductRepository
+namespace Ops.Infrastructure.Repositories
+{
+    public class ProductRepository
     : GenericRepository<Product>,
       IProductRepository
-{
-    public ProductRepository(ApplicationDbContext context)
-        : base(context)
     {
-    }
+        public ProductRepository(ApplicationDbContext context)
+            : base(context)
+        {
+        }
 
-    public async Task<Product?> GetBySkuAsync(string sku)
-    {
-        return await _context.Products
-            .FirstOrDefaultAsync(x => x.SKU == sku);
+        public async Task<Product?> GetBySkuAsync(string sku)
+        {
+            return await _context.Products.FirstOrDefaultAsync(x => x.SKU == sku);
+        }
     }
 }
 
 
 
 ============== 
-File Path: src/Ops.Infrastructure/UnitOfWork/UnitOfWork.cs
+File Path: src/Ops.Infrastructure/UnitOfWork.cs  (Change the folder structure at the top)
 
 using Ops.Application.Interfaces;
 using Ops.Infrastructure.Data;
 
-namespace Ops.Infrastructure.UnitOfWork;
-
-public class UnitOfWork : IUnitOfWork
+namespace Ops.Infrastructure
 {
-    private readonly ApplicationDbContext _context;
-
-    public IProductRepository Products { get; }
-
-    public UnitOfWork(
-        ApplicationDbContext context,
-        IProductRepository productRepository)
+    public class UnitOfWork : IUnitOfWork
     {
-        _context = context;
-        Products = productRepository;
-    }
+        private readonly ApplicationDbContext _context;
 
-    public async Task<int> SaveAsync()
-    {
-        return await _context.SaveChangesAsync();
-    }
+        public IProductRepository Products { get; }
 
-    public void Dispose()
-    {
-        _context.Dispose();
+        public UnitOfWork(
+            ApplicationDbContext context,
+            IProductRepository productRepository)
+        {
+            _context = context;
+            Products = productRepository;
+        }
+
+        public async Task<int> SaveAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
+        }
     }
 }
+
 
 ============== 
 File Path: Ops.Infrastructure/DependencyInjection.cs
@@ -1481,85 +1483,35 @@ using Microsoft.Extensions.DependencyInjection;
 using Ops.Application.Interfaces;
 using Ops.Infrastructure.Data;
 using Ops.Infrastructure.Repositories;
-using Ops.Infrastructure.UnitOfWork;
 
-namespace Ops.Infrastructure;
-
-public static class DependencyInjection
+namespace Ops.Infrastructure
 {
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static class DependencyInjection
     {
-        services.AddDbContext<ApplicationDbContext>(options =>
+        public static IServiceCollection AddInfrastructure(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
-            options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"));
-        });
+            services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(
+                    configuration.GetConnectionString("DefaultConnection"));
+            });
 
-        services.AddScoped(
-            typeof(IGenericRepository<>),
-            typeof(GenericRepository<>));
+            services.AddScoped(
+                typeof(IGenericRepository<>),
+                typeof(GenericRepository<>));
 
-        services.AddScoped<IProductRepository,
-                           ProductRepository>();
+            services.AddScoped<IProductRepository,
+                               ProductRepository>();
 
-        services.AddScoped<IUnitOfWork,
-                           UnitOfWork>();
+            services.AddScoped<IUnitOfWork,
+                               UnitOfWork>();
 
-        return services;
+            return services;
+        }
     }
 }
-
-============== DTOs - CreateProductDto
-
-public class CreateProductDto
-{
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public decimal Price { get; set; }
-    public int StockQuantity { get; set; }
-    public string SKU { get; set; } = string.Empty;
-}
-
-
-UpdateProductDto.cs
-
-public class UpdateProductDto
-{
-    public string Name { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public decimal Price { get; set; }
-    public int StockQuantity { get; set; }
-    public string SKU { get; set; } = string.Empty;
-}
-
-PATCH DTO
-public class ProductPatchDto
-{
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public decimal? Price { get; set; }
-    public int? StockQuantity { get; set; }
-    public string? SKU { get; set; }
-}
-
-============== Repository Interface
-
-
-
-public interface IProductRepository 
-{
-    Task<IEnumerable<Product>> GetAllAsync();
-    Task<Product?> GetByIdAsync(int id);
-    Task AddAsync(Product product);
-    void Update(Product product);
-    void Delete(Product product);
-}
-
-
-Note: Improvement is required as follows:
-public interface IProductRepository : IGenericRepository<Product>
 
 
 ================================================= API
@@ -1574,221 +1526,214 @@ src/Ops.API/appsettings.json
 
 ============== Ops.API/appSettings.json 
 
-"ConnectionStrings": {
-  "DefaultConnection": "Server=Your_DB_Server_Name;Database=DB_Name;Trusted_Connection=True;Encrypt=False;"
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=TALW42NLPC2783\\MSSQLSERVER_NEW;Database=opsdbjuly26;Trusted_Connection=True;Encrypt=False;"
+  }
 }
 
-
-"DefaultConnection": "Server=TALW42NLPC2783\\MSSQLSERVER_NEW;Database=opsdb_july26;Trusted_Connection=True;Encrypt=False;"
-
-
-============== Migration Commands - Install tool:
-dotnet tool install --global dotnet-ef
-
-Create Migration:
-
-dotnet ef migrations has-pending-model-changes -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
-
-
-dotnet ef migrations add InitialCreate ^
---project src/Ops.Infrastructure ^
---startup-project src/Ops.API
-
-
-Apply Migration:
-
-dotnet ef database update ^
---project src/Ops.Infrastructure ^
---startup-project src/Ops.API
-
-To List:
-dotnet ef migrations list -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
-
-
-Remove Migration:
-
-dotnet ef migrations remove ^
---project src/Ops.Infrastructure ^
---startup-project src/Ops.API
+Note: Replace it with your DB SERVER NAME TALW42NLPC2783\\MSSQLSERVER_NEW 
 
 
 ============== Controller CRUD + PATCH
 
 File path: src/Ops.API/Controllers/ProductsController.cs
 `
-
 using Microsoft.AspNetCore.Mvc;
 using Ops.Application.DTOs.Product;
-using Ops.Domain.Entities;
 using Ops.Application.Interfaces;
+using Ops.Domain.Entities;
 
-namespace Ops.API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class ProductsController : ControllerBase
+namespace Ops.API.Controllers
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    public ProductsController(IUnitOfWork unitOfWork)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ProductsController : ControllerBase
     {
-        _unitOfWork = unitOfWork;
-    }
+        private readonly IUnitOfWork _unitOfWork;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var products =
-            await _unitOfWork.Products.GetAllAsync();
-
-        return Ok(productDto);
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
-    {
-        var product =
-            await _unitOfWork.Products.GetByIdAsync(id);
-
-        if (product == null)
-            return NotFound();
-
-        //return Ok(product);
-	return Ok(productDto);	
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create(
-        CreateProductDto dto)
-    {
-
-	//Need Automapper - _mapper.Map<Product>(dto);
-        var product = new Product
+        public ProductsController(IUnitOfWork unitOfWork)
         {
-            Name = dto.Name,
-            Description = dto.Description,
-            Price = dto.Price,
-            StockQuantity = dto.StockQuantity,
-            SKU = dto.SKU
-        };
+            _unitOfWork = unitOfWork;
+        }
 
-        await _unitOfWork.Products.AddAsync(product);
+        [HttpGet]
+        public async Task<IActionResult> GetAll(CancellationToken token)
+        {
+            var products =
+                await _unitOfWork.Products.GetAllAsync(token);
 
-        await _unitOfWork.SaveAsync();
+            //return Ok(productDto);
+            return Ok(products);
+            //return Ok();
+        }
 
-        return CreatedAtAction(
-            nameof(Get),
-            new { id = product.Id },
-            product //Return DTO
-       );
-    }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id, CancellationToken token)
+        {
+            var product =
+                await _unitOfWork.Products.GetByIdAsync(id, token);
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(
-        int id,
-        UpdateProductDto dto)
-    {
-        var product =
-            await _unitOfWork.Products.GetByIdAsync(id);
+            if (product == null)
+                return NotFound();
 
-        if (product == null)
-            return NotFound();
+            //return Ok(product);
+            //return Ok(productDto);
+            return Ok();
+        }
 
-        product.Name = dto.Name;
-        product.Description = dto.Description;
-        product.Price = dto.Price;
-        product.StockQuantity = dto.StockQuantity;
-        product.SKU = dto.SKU;
+        [HttpPost]
+        public async Task<IActionResult> Create(
+            CreateProductDto dto, CancellationToken token)
+        {
 
-        _unitOfWork.Products.Update(product);
+            //Need Automapper - _mapper.Map<Product>(dto);
+            var product = new Product
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Price = dto.Price,
+                StockQuantity = dto.StockQuantity,
+                SKU = dto.SKU
+            };
 
-        await _unitOfWork.SaveAsync();
+            await _unitOfWork.Products.AddAsync(product, token);
 
-        return NoContent();
-    }
+            await _unitOfWork.SaveAsync();
 
-    [HttpPatch("{id}")]
-    public async Task<IActionResult> Patch(
-        int id,
-        ProductPatchDto dto)
-    {
-        var product =
-            await _unitOfWork.Products.GetByIdAsync(id);
+            return CreatedAtAction(
+                nameof(Get),
+                new { id = product.Id },
+                product //Return DTO
+           );
+        }
 
-        if (product == null)
-            return NotFound();
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(
+            int id,
+            UpdateProductDto dto, CancellationToken cancellationToken)
+        {
+            var product =
+                await _unitOfWork.Products.GetByIdAsync(id, cancellationToken);
 
-        if (dto.Name != null)    // Prefer JsonPatchDocument<ProductPatchDto>
+            if (product == null)
+                return NotFound();
+
             product.Name = dto.Name;
-
-        if (dto.Description != null)
             product.Description = dto.Description;
-
-        if (dto.Price.HasValue)
-            product.Price = dto.Price.Value;
-
-        if (dto.StockQuantity.HasValue)
-            product.StockQuantity = dto.StockQuantity.Value;
-
-        if (dto.SKU != null)
+            product.Price = dto.Price;
+            product.StockQuantity = dto.StockQuantity;
             product.SKU = dto.SKU;
 
-        _unitOfWork.Products.Update(product);
+            _unitOfWork.Products.Update(product, cancellationToken);
 
-        await _unitOfWork.SaveAsync();
+            await _unitOfWork.SaveAsync();
 
-        return NoContent();
-    }
+            return NoContent();
+        }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var product =
-            await _unitOfWork.Products.GetByIdAsync(id);
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Patch(
+            int id,
+            ProductPatchDto dto, CancellationToken cancellationToken)
+        {
+            var product =
+                await _unitOfWork.Products.GetByIdAsync(id, cancellationToken);
 
-        if (product == null)
-            return NotFound();
+            if (product == null)
+                return NotFound();
 
-        _unitOfWork.Products.Delete(product);
+            if (dto.Name != null)    // Prefer JsonPatchDocument<ProductPatchDto>
+                product.Name = dto.Name;
 
-        await _unitOfWork.SaveAsync();
+            if (dto.Description != null)
+                product.Description = dto.Description;
 
-        return NoContent();
+            if (dto.Price.HasValue)
+                product.Price = dto.Price.Value;
+
+            if (dto.StockQuantity.HasValue)
+                product.StockQuantity = dto.StockQuantity.Value;
+
+            if (dto.SKU != null)
+                product.SKU = dto.SKU;
+
+            _unitOfWork.Products.Update(product, cancellationToken);
+
+            await _unitOfWork.SaveAsync();
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
+        {
+            var product =
+                await _unitOfWork.Products.GetByIdAsync(id, cancellationToken);
+
+            if (product == null)
+                return NotFound();
+
+            _unitOfWork.Products.Delete(product, cancellationToken);
+
+            await _unitOfWork.SaveAsync();
+
+            return NoContent();
+        }
     }
 }
+
 ============== 
 File path: src/Ops.API/Program.cs
 
 
-
-
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
+using Ops.Infrastructure;
 using Ops.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
 builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+// 1. Add CORS services and define an "AllowAll" policy
+builder.Services.AddCors(options =>
 {
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:4200")
+            //"file:///D:/Projects/DotNetProjects/1July26-Pool/ops-frontend/basics/")
+             //policy.WithOrigins("http://127.0.0.1:5500") // Replace with your EXACT frontend URL (No trailing slash)
+             //policy.AllowAnyOrigin()
+             .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();  // Required to read the HttpOnly cookie from /v4Get
+    });
 });
-
-builder.Services.AddInfrastructure(builder.Configuration);
-
-builder.Services.AddProblemDetails(); //Exception middleware
-
-
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.MapOpenApi();
     app.UseSwagger();
 
     app.UseSwaggerUI(options =>
@@ -1803,13 +1748,46 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// 2. Enable the defined CORS policy globally
+app.UseCors("AllowAll");
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+//https://localhost:6004/
+app.MapGet("/", ()=> "Hello World! "); //HTTP GET - Root Route // Minimal API
+//This get request will be accessible from the browser/ JS/ swagger / Postman API/ Thunder Client
+//To access this web api from the frontend application we need to add CORS in Program.cs file
+
+app.MapGet("/v2Get", () => new { message = "Hello World! "} );
+
+app.MapGet("/v3Get", () => new { message = "Hello World! ", key=123, key2="Some String" });
+
+app.MapGet("/v4Get", (HttpContext context) =>
+{
+    // 1. Create options for the cookie (Security settings)
+    CookieOptions options = new CookieOptions
+    {
+        HttpOnly = true,       // Prevents JavaScript from reading the cookie (protects against XSS)
+        //Secure = true,         // Ensures cookie is only sent over HTTPS
+        Secure = false,        // http://localhost:4200
+        SameSite = SameSiteMode.Lax, // Allows cookie to be sent on standard cross-site navigations
+        Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Cookie lifespan
+    };
+
+    // 2. Append the cookie to the HTTP response headers
+    context.Response.Cookies.Append("MyUserToken", "SecureValue123", options);
+
+    // 3. Return your JSON payload
+    return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
+});
+
+
+app.Run(); // Run() will be executed only once, when we start the application
 
 =======================================================
+
 
 # Build the Solution
 
@@ -1819,13 +1797,49 @@ dotnet build
 
 The build should succeed with no errors.
 
----
 
-* Configuring `Product` with Fluent API (`IEntityTypeConfiguration<Product>`)
-* Configuring the SQL Server connection string
+============== Migration Commands - Install tool:
+
+Use SSMS and run below query:
+CRETAE DATABASE opsdbjuly26;
+
+
+Run the below query from CMD:
+dotnet tool install --global dotnet-ef
+
+Tool 'dotnet-ef' was successfully updated from version '10.0.3' to version '10.0.9'.
+
+
+Create Migration:
+
+dotnet ef migrations has-pending-model-changes -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
+
+
+Build started...
+Build succeeded.
+Changes have been made to the model since the last migration. Add a new migration.
+
+
+dotnet ef migrations add InitialCreate --project src/Ops.Infrastructure --startup-project src/Ops.API
+
+
+Apply Migration:
+
+dotnet ef database update --project src/Ops.Infrastructure --startup-project src/Ops.API
+
+To List:
+dotnet ef migrations list -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
+
+
+Remove Migration:
+
+dotnet ef migrations remove ^
+--project src/Ops.Infrastructure ^
+--startup-project src/Ops.API
+
 
 ===========================================================================
-cd D:\Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
+cd D:\1-Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend
 dotnet build
 
 port https:6004, http:6005
