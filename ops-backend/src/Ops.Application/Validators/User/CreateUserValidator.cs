@@ -18,8 +18,10 @@ namespace Ops.Application.Validators.Product
             RuleFor(x => x.Password)
                 .NotEmpty()
                 .MaximumLength(500);
-            
-            //Role is already taken care by UserRole enum
+
+            RuleFor(x => x.Role)
+                        .IsInEnum()
+                        .WithMessage("Invalid role specified.");
 
             RuleFor(x => x.MobileNumber)
                 .NotEmpty()

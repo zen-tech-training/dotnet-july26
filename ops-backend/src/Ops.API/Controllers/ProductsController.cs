@@ -34,10 +34,6 @@ namespace Ops.API.Controllers
             });
 
             return Ok(productDtos);
-
-
-            //return Ok(products);
-            //return Ok();
         }
 
         [HttpGet("{id}")]
@@ -49,9 +45,7 @@ namespace Ops.API.Controllers
             if (product == null)
                 return NotFound();
 
-            //return Ok(product);
-            //return Ok(productDto);
-            return Ok();
+            return Ok(product);
         }
 
         [HttpPost]
@@ -107,7 +101,7 @@ namespace Ops.API.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> Patch(
             int id,
-            ProductPatchDto dto, CancellationToken cancellationToken)
+            PatchProductDto dto, CancellationToken cancellationToken)
         {
             var product =
                 await _unitOfWork.Products.GetByIdAsync(id, cancellationToken);
@@ -115,7 +109,7 @@ namespace Ops.API.Controllers
             if (product == null)
                 return NotFound();
 
-            if (dto.Name != null)    // Prefer JsonPatchDocument<ProductPatchDto>
+            if (dto.Name != null)    // Prefer JsonPatchDocument<PatchProductDto>
                 product.Name = dto.Name;
 
             if (dto.Description != null)

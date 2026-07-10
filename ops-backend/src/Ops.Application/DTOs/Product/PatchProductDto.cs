@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Ops.Application.DTOs.Product
 {
-    public class ProductPatchDto
+    public class PatchProductDto
     {
         public string? Name { get; set; }
         public string? Description { get; set; }

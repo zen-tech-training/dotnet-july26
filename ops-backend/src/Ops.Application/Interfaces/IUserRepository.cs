@@ -7,8 +7,8 @@ namespace Ops.Application.Interfaces
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        //Task<User?> GetByUserName(string userName, CancellationToken cancellationToken);
-        //Task<User?>  (string email, CancellationToken cancellationToken);
-        //Task<User?> GetByMobileNumber(string mobileNumber, CancellationToken cancellationToken);
+        Task<User?> GetByUserNameAsync(string userName, CancellationToken cancellationToken = default);
+        Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+        Task<User?> GetByMobileNumberAsync(string mobileNumber, CancellationToken cancellationToken = default);
     }
 }
