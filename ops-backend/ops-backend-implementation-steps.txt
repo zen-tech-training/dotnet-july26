@@ -1846,3 +1846,240 @@ port https:6004, http:6005
 
 cd src/Ops.API
 dotnet run --urls "https://localhost:6004"
+
+
+
+======================================================================================================================================================
+
+UserRole Enum, User Entity, UserConfiguration and Authentication
+
+======================================================================================================================================================
+
+namespace Ops.Domain.Enums
+{
+    public enum UserRole
+    {
+        Admin = 0,
+        SuperUser = 1,
+        User = 2
+    }
+}
+
+===================================	
+
+
+using Ops.Domain.Common;
+using Ops.Domain.Enums;
+
+namespace Ops.Domain.Entities
+{
+    public class User : BaseEntity
+    {
+        public string? UserName { get; set; } //User Name tom.joseph@ops.com
+        public string? Password { get; set; }
+        public UserRole Role { get; set; } //0-Admin, 1-Superuser, 2-User
+        public string MobileNumber { get; set; } = string.Empty;
+        public string? Email { get; set; }  //tom.joseph@ops.com
+    }
+}
+
+
+
+===========================================================================
+//File path: Ops.Infrastructure/Data/ApplicationDbContext.cs
+
+//Modify the file
+
+public DbSet<Product> Products => Set<Product>();                
+public DbSet<User> Users => Set<User>();
+
+
+===========================================================================
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Ops.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Infrastructure.Configurations
+{
+    public class UserConfiguration : IEntityTypeConfiguration<User>
+    {
+        public void Configure(EntityTypeBuilder<User> builder)
+        {
+            builder.ToTable("Users");
+
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.UserName)
+                   .HasMaxLength(100)
+                   .IsRequired();
+
+            builder.Property(x => x.Password)
+                   .HasMaxLength(500);  // To store the Hashed Pwd
+
+            builder.Property(x => x.Role);
+            //0 or 1 or 2 - check constraint//Already covered through enum
+
+            builder.Property(x => x.MobileNumber)
+                    .HasMaxLength(15);
+
+            builder.Property(x => x.Email)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+            // Unique Username
+            builder.HasIndex(x => x.UserName)
+                   .IsUnique()
+                   .HasDatabaseName("IX_Users_UserName");
+
+            builder.HasIndex(x => x.MobileNumber)
+                   .IsUnique()
+                   .HasDatabaseName("IX_Users_MobileNumber");
+
+            builder.HasIndex(x => x.Email)
+                   .IsUnique()
+                   .HasDatabaseName("IX_Users_Email");
+        }
+    }
+}
+
+===========================================================================
+
+dotnet ef migrations has-pending-model-changes -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
+
+dotnet ef migrations add UserEntityV1 --project src/Ops.Infrastructure --startup-project src/Ops.API
+
+dotnet ef database update --project src/Ops.Infrastructure --startup-project src/Ops.API
+
+===========================================================================
+
+using Ops.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Application.DTOs.User
+{
+    public class CreateUserDto
+    {
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public UserRole Role { get; set; }
+        public string MobileNumber { get; set; } = string.Empty;
+        public string? Email { get; set; }
+    }
+}
+
+
+==============
+
+using FluentValidation;
+using Ops.Application.DTOs.Product;
+using Ops.Application.DTOs.User;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Application.Validators.Product
+{
+    public class CreateUserValidator : AbstractValidator<CreateUserDto>
+    {
+        public CreateUserValidator()
+        {
+            RuleFor(x => x.UserName)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.Password)
+                .NotEmpty()
+                .MaximumLength(500);
+            
+            //Role is already taken care by UserRole enum
+
+            RuleFor(x => x.MobileNumber)
+                .NotEmpty()
+                .MaximumLength(15);
+
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .MaximumLength(100);
+        }
+    }
+}
+
+
+===============
+
+using Ops.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Application.Interfaces
+{
+    public interface IUserRepository : IGenericRepository<User>
+    {
+        Task<User?> GetByUserName(string userName, CancellationToken cancellationToken);
+        Task<User?> GetByEmail(string email, CancellationToken cancellationToken);
+        Task<User?> GetByMobileNumber(string mobileNumber, CancellationToken cancellationToken);
+    }
+}
+
+================
+
+Modify 
+//File path: Ops.Application/Interfaces/IUnitOfWork.cs
+
+IProductRepository Products { get; }  //Property/ Field/ Attribute
+IUserRepository Users { get; }
+
+
+============
+
+
+using Ops.Application.Interfaces;
+using Ops.Infrastructure.Data;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Infrastructure
+{
+    public class UnitOfWork : IUnitOfWork
+    {
+        private readonly ApplicationDbContext _context;
+
+        public IProductRepository Products { get; }
+        public IUserRepository Users { get; }
+
+        public UnitOfWork(
+            ApplicationDbContext context,
+            IProductRepository productRepository,
+            IUserRepository userRepository)
+        {
+            _context = context;
+            Products = productRepository;
+            Users = userRepository;
+        }
+
+        public async Task<int> SaveAsync()
+        {
+            return await _context.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
+        }
+    }
+}
+
+==============
+
+Modify namespace Ops.Infrastructure/DependencyInjection.cs
+
+            services.AddScoped<IUserRepository,
+                               UserRepository>();
+

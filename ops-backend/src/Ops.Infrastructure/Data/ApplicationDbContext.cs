@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿//File path: Ops.Infrastructure/Data/ApplicationDbContext.cs
+using Microsoft.EntityFrameworkCore;
 using Ops.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,10 @@ namespace Ops.Infrastructure.Data
         {
         }
 
-        public DbSet<Product> Products => Set<Product>();
-
+        public DbSet<Product> Products => Set<Product>();                
+        public DbSet<User> Users => Set<User>();
         //Add your entity
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

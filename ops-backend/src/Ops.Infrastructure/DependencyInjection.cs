@@ -31,6 +31,9 @@ namespace Ops.Infrastructure
             services.AddScoped<IProductRepository,
                                ProductRepository>();
 
+            services.AddScoped<IUserRepository,
+                               UserRepository>();
+
             //Add you newly created Entity Repository as a Scoped Service
 
             services.AddScoped<IUnitOfWork,

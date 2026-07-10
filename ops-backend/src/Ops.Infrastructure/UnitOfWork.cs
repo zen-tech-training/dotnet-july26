@@ -11,13 +11,16 @@ namespace Ops.Infrastructure
         private readonly ApplicationDbContext _context;
 
         public IProductRepository Products { get; }
+        public IUserRepository Users { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
-            IProductRepository productRepository)
+            IProductRepository productRepository,
+            IUserRepository userRepository)
         {
             _context = context;
             Products = productRepository;
+            Users = userRepository;
         }
 
         public async Task<int> SaveAsync()
