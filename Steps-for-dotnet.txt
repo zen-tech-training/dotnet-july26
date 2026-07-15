@@ -24,11 +24,9 @@ and some more
 
 But right now I just want one 'Product' entity/model, and the CRUD operation for this.
 
-cd D:\Projects\DotNetProjects\OPS-july2026
+git clone https://github.com/________/dotnet-july26.git
 
-git clone https://github.com/________/OPS-july2026.git
-
-cd OPS-july2026
+cd dotnet-july26
 md ops-backend
 cd ops-backend
 md src
@@ -49,10 +47,12 @@ obj/
 *.dll
 *.exe
 
+====
+git rm --cached ops-backend/src/Ops.API/appsettings.json
 
 ======
 1) Create ASP.NET Core Web API project - Ops.API
-cd D:\Projects\DotNetProjects\OPS-july2026\ops\ops-backend\src
+cd .....\dotnet-july26\ops-backend\src
 dotnet new webapi -n Ops.API --use-controllers
 
 2) Shared project
