@@ -3,7 +3,6 @@ using Ops.Application.Interfaces;
 using Ops.Domain.Entities;
 using Ops.Infrastructure.Data;
 
-
 public class ProductRepository : IProductRepository
 {
     private readonly ApplicationDbContext _context;
