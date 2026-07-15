@@ -57,6 +57,27 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
+// Inline Middleware Implementation
+app.Use(async (context, next) =>
+{
+    // Logic BEFORE the next middleware (e.g., logging request)
+    Console.WriteLine($"First Inline Middleware Before - Request Method: {context.Request.Method}");
+    Console.WriteLine($"First Inline Middleware Before - Response Status: {context.Response.StatusCode}");
+
+    // Call the next middleware in the pipeline
+    await next(context); //
+
+    // Logic AFTER the next middleware (e.g., logging response status)
+    Console.WriteLine($"First Inline Middleware After - Response Status: {context.Response.StatusCode}");
+});
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"Second Inline Middleware Before - Request Method: {context.Request.Method}");
+    await next(context);
+    Console.WriteLine($"Second Inline Middleware After - Response Status: {context.Response.StatusCode}");
+});
+
 app.MapControllers();
 
 //https://localhost:6004/
