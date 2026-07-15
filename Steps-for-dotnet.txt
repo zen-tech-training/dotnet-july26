@@ -21,9 +21,7 @@ In backend application I need below concepts to be covered:
 13. Call to Stored procedure, Views
 and some more 
 
-
-But right now I just want one 'Product' entity/model, and the CRUD operation for this.
-
+========================================================================== Step 1 : Create Solution and Projects
 git clone https://github.com/________/dotnet-july26.git
 
 cd dotnet-july26
@@ -35,7 +33,7 @@ md tests
 
 dotnet new sln -n ops-solution  // creates ops-solution.slnx file in dotnet 10 version
 
-============
+====================
 
 dotnet new gitignore
 
@@ -47,10 +45,11 @@ obj/
 *.dll
 *.exe
 
-====
+ops-backend/src/Ops.API/appsettings.json
+==========
 git rm --cached ops-backend/src/Ops.API/appsettings.json
 
-======
+====================
 1) Create ASP.NET Core Web API project - Ops.API
 cd .....\dotnet-july26\ops-backend\src
 dotnet new webapi -n Ops.API --use-controllers
@@ -93,9 +92,7 @@ dotnet sln add src\webapp\webapp.csproj
 dotnet sln add tests\Ops.UnitTests\Ops.UnitTests.csproj
 dotnet sln add tests\Ops.IntegrationTests\Ops.IntegrationTests.csproj
 
-
-
-==========
+====================
 
 Final Architecture :
 
@@ -171,8 +168,6 @@ OPS101 (Order Processing Solution)
 │   │   │     ErrorResponse.cs
 │   │   │     PagedResponse.cs
 │   │   │
-│   │   ├── Behaviors
-│   │   │
 │   │   ├── Features
 │   │   │
 │   │   └── DependencyInjection.cs
@@ -237,9 +232,7 @@ OPS101 (Order Processing Solution)
 └── ops-solution.slnx
 
 
-
-
-============Dependency Flow
+==================== Dependency Flow
 
                 ┌─────────────────────┐
                 │      Ops.API        │
@@ -268,9 +261,7 @@ Infrastructure depends on Application and Domain.
 Domain has no dependencies on other projects.
 
 
-========== Product Flow
-
-
+==================== Product Flow
 
 HTTP Request
       │
@@ -296,9 +287,7 @@ ApplicationDbContext
 SQL Server
 
 
-
-
-=========== Validation Flow
+==================== Validation Flow
 Client
    │
    ▼
@@ -311,7 +300,7 @@ FluentValidation
 ProductService
 
 
-============ Mapping Flow
+==================== Mapping Flow
 
 CreateProductDto
         │
@@ -322,7 +311,7 @@ AutoMapper
 Product Entity
 
 
-=============== Exception Flow
+==================== Exception Flow
 Controller
      │
      ▼
@@ -337,7 +326,7 @@ Global Exception Middleware
 ProblemDetails (HTTP 404)
 
 
-=========== Logging Flow (Future)
+==================== Logging Flow (Future)
 
 Controller
       │
@@ -354,7 +343,7 @@ Seq
 Azure Monitor
 
 
-=========== Authentication Flow (Future)
+==================== Authentication Flow (Future)
 
 
 Angular
@@ -369,7 +358,7 @@ API
 Authorize Attribute
 
 
-=============== Azure Deployment (Future)
+==================== Azure Deployment (Future)
 
 
 Angular
@@ -399,7 +388,7 @@ Azure Key Vault
 Application Insights
 
 
-============== Future Modules
+==================== Future Modules
 Phase 1
 --------
 ✔ Product
@@ -471,7 +460,7 @@ dotnet build
 
 Build should succeed.
 
----
+====================
 
 # Step 2 Install NuGet Packages
 
@@ -515,13 +504,11 @@ Later we'll install:
 when required.
 
 
-=========================================================================== Step 4: Domain
+=========================================================================== Step 3: Domain
 
 src/Ops.Domain/Common/BaseEntity.cs
 
 src/Ops.Domain/Entities/Product.cs
-
-
 
 
 # Step 4.1 Create BaseEntity
@@ -547,6 +534,7 @@ Product, Customer, Order, OrderItem, Category, Supplier, etc.
 
 All inherit BaseEntity
 
+====================
 
 # Step 4.2 Create Product Entity
 
@@ -599,7 +587,7 @@ CreateProductValidator
 UpdateProductValidator
 and Fluent API.
 
-=========================================================================== Step 5: Application
+=========================================================================== Step 4: Application
 
 src/Ops.Application/DTOs/Product/CreateProductDto.cs
 src/Ops.Application/DTOs/Product/PatchProductDto.cs
@@ -621,7 +609,7 @@ src/Ops.Application/Interfaces/IUnitOfWork.cs
 
 src/Ops.Application/DependencyInjection.cs
 
-============== DTOs - Product
+==================== DTOs - Product
 
 namespace Ops.Application.DTOs.Product
 {
@@ -637,7 +625,6 @@ namespace Ops.Application.DTOs.Product
 
 ==========
 
-
 namespace Ops.Application.DTOs.Product
 {
     public class PatchProductDto
@@ -651,8 +638,6 @@ namespace Ops.Application.DTOs.Product
 }
 
 ==========
-
-
 
 namespace Ops.Application.DTOs.Product
 {
@@ -1217,7 +1202,7 @@ public static class DependencyInjection
     }
 }
 
-================================================= API
+=========================================================================== API
 
 src/Ops.API/Controllers/ProductsController.cs
 
@@ -1415,9 +1400,6 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-
-
-
 // First Inline Middleware Implementation
 app.Use(async (context, next) =>
 {
@@ -1474,11 +1456,10 @@ app.MapGet("/v4Get", (HttpContext context) =>
     return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
 });
 
-
 app.Run();
 
 
-=======================================================
+=========================================================================== Build, Migrate and Run
 
 
 # Build the Solution from the solution folder dotnet-july26\ops-backend
@@ -1526,7 +1507,8 @@ Remove Migration:
 dotnet ef migrations remove --project src/Ops.Infrastructure --startup-project src/Ops.API
 
 
-===========================================================================
+==================== Run
+
 cd .........\ops-backend
 
 dotnet build
@@ -1553,7 +1535,7 @@ namespace Ops.Domain.Enums
     }
 }
 
-===================================	
+====================	
 
 
 using Ops.Domain.Common;
@@ -1563,26 +1545,16 @@ namespace Ops.Domain.Entities
 {
     public class User : BaseEntity
     {
-        public string? UserName { get; set; } //User Name tom.joseph@ops.com
+        public string? UserName { get; set; }
         public string? Password { get; set; }
         public UserRole Role { get; set; } //0-Admin, 1-Superuser, 2-User
         public string MobileNumber { get; set; } = string.Empty;
-        public string? Email { get; set; }  //tom.joseph@ops.com
+        public string? Email { get; set; }
     }
 }
 
+========================================
 
-
-===========================================================================
-//File path: Ops.Infrastructure/Data/ApplicationDbContext.cs
-
-//Modify the file
-
-public DbSet<Product> Products => Set<Product>();                
-public DbSet<User> Users => Set<User>();
-
-
-===========================================================================
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ops.Domain.Entities;
@@ -1632,8 +1604,21 @@ namespace Ops.Infrastructure.Configurations
         }
     }
 }
-===========================================================================
-cd D:\1-Projects\DotNetProjects\OPS-july2026\ops\ops-backend
+
+
+
+====================
+//File path: Ops.Infrastructure/Data/ApplicationDbContext.cs
+
+//Modify the file
+
+public DbSet<Product> Products => Set<Product>();                
+public DbSet<User> Users => Set<User>();
+
+
+
+========================================
+cd ...../ops-backend
 
 dotnet ef migrations has-pending-model-changes -p .\src\Ops.Infrastructure\Ops.Infrastructure.csproj -s .\src\Ops.API\Ops.API.csproj
 
@@ -1641,7 +1626,9 @@ dotnet ef migrations add UserEntityV1 --project src/Ops.Infrastructure --startup
 
 dotnet ef database update --project src/Ops.Infrastructure --startup-project src/Ops.API
 
-===========================================================================
+
+
+=========================================================================== User DTO, Interfaces, Repositories, Configuration, Validators, Controller
 
 using Ops.Domain.Enums;
 using System;
@@ -1660,14 +1647,74 @@ namespace Ops.Application.DTOs.User
     }
 }
 
+==========
 
-==============
+using Ops.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Application.DTOs.User
+{
+    public class PatchUserDto
+    {
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public UserRole Role { get; set; }
+        public string MobileNumber { get; set; } = string.Empty;
+        public string? Email { get; set; }
+    }
+}
+
+
+==========
+
+using Ops.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Application.DTOs.User
+{
+    public class UpdateUserDto
+    {
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public UserRole Role { get; set; }
+        public string MobileNumber { get; set; } = string.Empty;
+        public string? Email { get; set; }
+    }
+}
+
+==========
+
+using Ops.Domain.Enums;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Ops.Application.DTOs.User
+{
+    public class UserDto
+    {
+        public int Id { get; set; }
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public UserRole Role { get; set; }
+        public string MobileNumber { get; set; } = string.Empty;
+        public string? Email { get; set; }
+    }
+}
+
+==================== CreateUserValidator
 
 using FluentValidation;
-using Ops.Application.DTOs.Product;
 using Ops.Application.DTOs.User;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Ops.Application.Validators.Product
+namespace Ops.Application.Validators.User
 {
     public class CreateUserValidator : AbstractValidator<CreateUserDto>
     {
@@ -1697,8 +1744,374 @@ namespace Ops.Application.Validators.Product
 }
 
 
+====================
 
-===============
+using AutoMapper;
+using Ops.Application.DTOs.Product;
+using Ops.Application.DTOs.User;
+using Ops.Domain.Entities;
+
+namespace Ops.Application.Mapping;
+
+public class AutoMapperProfile : Profile
+{
+    public AutoMapperProfile()
+    {
+        // Entity -> DTO
+        CreateMap<Product, ProductDto>();
+        CreateMap<User, UserDto>();
+
+        // DTO -> Entity
+        CreateMap<CreateProductDto, Product>();
+        CreateMap<CreateUserDto, User>();
+
+        // DTO -> Existing Entity (Update)
+        CreateMap<UpdateProductDto, Product>();
+        CreateMap<UpdateUserDto, User>();
+
+        // Patch DTO -> Existing Entity
+        CreateMap<PatchProductDto, Product>()
+            .ForAllMembers(options =>
+                options.Condition((src, dest, srcMember) =>
+                    srcMember != null));
+
+        CreateMap<PatchUserDto, User>()
+            .ForAllMembers(options =>
+                options.Condition((src, dest, srcMember) =>
+                    srcMember != null));
+    }
+}
+
+====================
+
+// File path: Ops.Application/Interfaces/IUserRepository.cs
+
+using Ops.Domain.Entities;
+
+namespace Ops.Application.Interfaces;
+
+public interface IUserRepository
+{
+    Task<IEnumerable<User>> GetAllAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<User?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task<User?> GetByUserNameAsync(
+        string userName,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsUserNameAsync(
+        string userName,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsMobileNumberAsync(
+        string mobileNumber,
+        CancellationToken cancellationToken = default);
+
+    Task AddAsync(
+        User user,
+        CancellationToken cancellationToken = default);
+
+    void Update(User user);
+
+    void Delete(User user);
+
+    Task SaveChangesAsync(
+        CancellationToken cancellationToken = default);
+}
+
+
+====================
+
+// File path: Ops.Application/Services/UserService.cs
+
+using AutoMapper;
+using Ops.Application.DTOs.User;
+using Ops.Application.Interfaces;
+using Ops.Domain.Entities;
+
+namespace Ops.Application.Services;
+
+public class UserService : IUserService
+{
+    private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
+
+    public UserService(IUserRepository userRepository, IMapper mapper)
+    {
+        _userRepository = userRepository;
+        _mapper = mapper;
+    }
+
+    public async Task<IEnumerable<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var users = await _userRepository.GetAllAsync(cancellationToken);
+        return _mapper.Map<IEnumerable<UserDto>>(users);
+    }
+
+    public async Task<UserDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+        return user == null ? null : _mapper.Map<UserDto>(user);
+    }
+
+    public async Task<UserDto> CreateAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
+    {
+        if (dto.UserName != null && await _userRepository.ExistsUserNameAsync(dto.UserName, cancellationToken))
+            throw new InvalidOperationException("Username already exists.");
+
+        if (dto.Email != null && await _userRepository.ExistsEmailAsync(dto.Email, cancellationToken))
+            throw new InvalidOperationException("Email already exists.");
+
+        if (await _userRepository.ExistsMobileNumberAsync(dto.MobileNumber, cancellationToken))
+            throw new InvalidOperationException("Mobile number already exists.");
+
+        var userEntity = _mapper.Map<User>(dto);
+
+        // TODO: Apply secure hashing algorithm before saving password
+        // userEntity.Password = _passwordHasher.Hash(dto.Password);
+
+        await _userRepository.AddAsync(userEntity, cancellationToken);
+        await _userRepository.SaveChangesAsync(cancellationToken);
+
+        return _mapper.Map<UserDto>(userEntity);
+    }
+
+    public async Task UpdateAsync(int id, UpdateUserDto dto, CancellationToken cancellationToken = default)
+    {
+        var userEntity = await _userRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new KeyNotFoundException($"User with ID {id} not found.");
+
+        _mapper.Map(dto, userEntity);
+
+        _userRepository.Update(userEntity);
+        await _userRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task PatchAsync(int id, PatchUserDto dto, CancellationToken cancellationToken = default)
+    {
+        var userEntity = await _userRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new KeyNotFoundException($"User with ID {id} not found.");
+
+        _mapper.Map(dto, userEntity);
+
+        _userRepository.Update(userEntity);
+        await _userRepository.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var userEntity = await _userRepository.GetByIdAsync(id, cancellationToken)
+            ?? throw new KeyNotFoundException($"User with ID {id} not found.");
+
+        _userRepository.Delete(userEntity);
+        await _userRepository.SaveChangesAsync(cancellationToken);
+    }
+}
+
+
+====================
+
+Modify Ops.Application/DependencyInjection.cs 
+
+services.AddScoped<IProductService, ProductService>();
+services.AddScoped<IUserService, UserService>();
+
+====================
+
+// File path: Ops.Infrastructure/Repositories/UserRepository.cs
+
+using Microsoft.EntityFrameworkCore;
+using Ops.Application.Interfaces;
+using Ops.Domain.Entities;
+using Ops.Infrastructure.Data;
+
+namespace Ops.Infrastructure.Repositories;
+
+public class UserRepository : IUserRepository
+{
+    private readonly ApplicationDbContext _context;
+
+    public UserRepository(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public async Task<User?> GetByUserNameAsync(string userName, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.FirstOrDefaultAsync(x => x.UserName == userName, cancellationToken);
+    }
+
+    public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.AnyAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public async Task<bool> ExistsUserNameAsync(string userName, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.AnyAsync(x => x.UserName == userName, cancellationToken);
+    }
+
+    public async Task<bool> ExistsEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.AnyAsync(x => x.Email == email, cancellationToken);
+    }
+
+    public async Task<bool> ExistsMobileNumberAsync(string mobileNumber, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.AnyAsync(x => x.MobileNumber == mobileNumber, cancellationToken);
+    }
+
+    public async Task AddAsync(User user, CancellationToken cancellationToken = default)
+    {
+        await _context.Users.AddAsync(user, cancellationToken);
+    }
+
+    public void Update(User user)
+    {
+        _context.Users.Update(user);
+    }
+
+    public void Delete(User user)
+    {
+        _context.Users.Remove(user);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+}
+
+
+====================
+
+Modify Ops.Infrastructure/DependencyInjection.cs 
+
+services.AddScoped<IProductRepository, ProductRepository>();
+services.AddScoped<IUserRepository, UserRepository>();
+
+====================
+
+// File path: Ops.API/Controllers/UsersController.cs
+
+using Microsoft.AspNetCore.Mvc;
+using Ops.Application.DTOs.User;
+using Ops.Application.Interfaces;
+
+namespace Ops.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class UsersController : ControllerBase
+{
+    private readonly IUserService _userService;
+
+    public UsersController(IUserService userService)
+    {
+        _userService = userService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll(
+        CancellationToken cancellationToken)
+    {
+        var users = await _userService.GetAllAsync(cancellationToken);
+        return Ok(users);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userService.GetByIdAsync(id, cancellationToken);
+
+        if (user == null)
+            return NotFound();
+
+        return Ok(user);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        CreateUserDto dto,
+        CancellationToken cancellationToken)
+    {
+        var user = await _userService.CreateAsync(dto, cancellationToken);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = user.Id },
+            user);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(
+        int id,
+        UpdateUserDto dto,
+        CancellationToken cancellationToken)
+    {
+        await _userService.UpdateAsync(
+            id,
+            dto,
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id:int}")]
+    public async Task<IActionResult> Patch(
+        int id,
+        PatchUserDto dto,
+        CancellationToken cancellationToken)
+    {
+        await _userService.PatchAsync(
+            id,
+            dto,
+            cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        await _userService.DeleteAsync(
+            id,
+            cancellationToken);
+
+        return NoContent();
+    }
+}
+
+
+
+
+======================================================================================= NOT Applicable
 
 using Ops.Domain.Entities;
 using System;
@@ -1822,64 +2235,8 @@ namespace Ops.API.Controllers
 dotnet build
 dotnet run
 
-===================================== Add DTOs and other HTTP requests for User entity
-
-using Ops.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ops.Application.DTOs.User
-{
-    public class UserDto
-    {
-        public int Id { get; set; }
-        public string? UserName { get; set; }
-        public string? Password { get; set; }
-        public UserRole Role { get; set; }
-        public string MobileNumber { get; set; } = string.Empty;
-        public string? Email { get; set; }
-    }
-}
-
-=============
-
-using Ops.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ops.Application.DTOs.User
-{
-    public class UpdateUserDto
-    {
-        public string? UserName { get; set; }
-        public string? Password { get; set; }
-        public UserRole Role { get; set; }
-        public string MobileNumber { get; set; } = string.Empty;
-        public string? Email { get; set; }
-    }
-}
 
 
-=========
-
-using Ops.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ops.Application.DTOs.User
-{
-    public class PatchUserDto
-    {
-        public string? UserName { get; set; }
-        public string? Password { get; set; }
-        public UserRole Role { get; set; }
-        public string MobileNumber { get; set; } = string.Empty;
-        public string? Email { get; set; }
-    }
-}
 
 ==========
 
