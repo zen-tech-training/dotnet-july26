@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Ops.Application.DTOs.Product
+﻿namespace Ops.Application.DTOs.Product
 {
     public class PatchProductDto
     {

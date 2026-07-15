@@ -1,12 +1,36 @@
 ﻿using Ops.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Ops.Application.Interfaces
+namespace Ops.Application.Interfaces;
+
+public interface IProductRepository
 {
-    public interface IProductRepository : IGenericRepository<Product>
-    {
-        Task<Product?> GetBySkuAsync(string sku, CancellationToken cancellationToken);
-    }
+    Task<IEnumerable<Product>> GetAllAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<Product?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task<Product?> GetBySkuAsync(
+        string sku,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ExistsSkuAsync(
+        string sku,
+        CancellationToken cancellationToken = default);
+
+    Task AddAsync(
+        Product product,
+        CancellationToken cancellationToken = default);
+
+    void Update(Product product);
+
+    void Delete(Product product);
+
+    Task SaveChangesAsync(
+        CancellationToken cancellationToken = default);
 }

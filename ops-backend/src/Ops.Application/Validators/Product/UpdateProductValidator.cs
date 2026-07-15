@@ -1,8 +1,5 @@
 ﻿using FluentValidation;
 using Ops.Application.DTOs.Product;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Ops.Application.Validators.Product
 {

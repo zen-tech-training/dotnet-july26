@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ops.API/Ops.API.csproj" />
+    <Project Path="src/Ops.Application/Ops.Application.csproj" />
+    <Project Path="src/Ops.CSharpBasics/Ops.CSharpBasics.csproj" />
+    <Project Path="src/Ops.Domain/Ops.Domain.csproj" />
+    <Project Path="src/Ops.Infrastructure/Ops.Infrastructure.csproj" />
+    <Project Path="src/Ops.Shared/Ops.Shared.csproj" />
+    <Project Path="src/webapp/webapp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Ops.IntegrationTests/Ops.IntegrationTests.csproj" />
+    <Project Path="tests/Ops.UnitTests/Ops.UnitTests.csproj" />
+  </Folder>
+</Solution>

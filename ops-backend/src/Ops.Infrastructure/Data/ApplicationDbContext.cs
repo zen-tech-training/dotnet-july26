@@ -1,31 +1,29 @@
-﻿//File path: Ops.Infrastructure/Data/ApplicationDbContext.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Ops.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Ops.Infrastructure.Data
+namespace Ops.Infrastructure.Data;
+
+public class ApplicationDbContext : DbContext
 {
-    public class ApplicationDbContext : DbContext
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options)
+        : base(options)
     {
-        public ApplicationDbContext(
-            DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-        }
+    }
 
-        public DbSet<Product> Products => Set<Product>();                
-        public DbSet<User> Users => Set<User>();
-        //Add your entity
+    public DbSet<Product> Products => Set<Product>();
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.ApplyConfigurationsFromAssembly(
-                typeof(ApplicationDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            typeof(ApplicationDbContext).Assembly);
+    }
 
-            base.OnModelCreating(modelBuilder);
-        }
+    public override async Task<int> SaveChangesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }
