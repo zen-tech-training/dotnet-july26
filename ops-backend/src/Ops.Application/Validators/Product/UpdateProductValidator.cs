@@ -1,0 +1,28 @@
+﻿using FluentValidation;
+using Ops.Application.DTOs.Product;
+
+namespace Ops.Application.Validators.Product
+{
+    public class UpdateProductValidator : AbstractValidator<UpdateProductDto>
+    {
+        public UpdateProductValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .MaximumLength(100);
+
+            RuleFor(x => x.Description)
+                .MaximumLength(500);
+
+            RuleFor(x => x.Price)
+                .GreaterThan(0);
+
+            RuleFor(x => x.StockQuantity)
+                .GreaterThanOrEqualTo(0);
+
+            RuleFor(x => x.SKU)
+                .NotEmpty()
+                .MaximumLength(50);
+        }
+    }
+}
