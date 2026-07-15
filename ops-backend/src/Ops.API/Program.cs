@@ -1,3 +1,4 @@
+using Ops.API.Middleware;
 using Ops.Application;
 using Ops.Infrastructure;
 
@@ -33,6 +34,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddTransient<MyMiddlewareThreeDI>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -57,7 +60,10 @@ app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-// Inline Middleware Implementation
+
+
+
+// First Inline Middleware Implementation
 app.Use(async (context, next) =>
 {
     // Logic BEFORE the next middleware (e.g., logging request)
@@ -71,6 +77,11 @@ app.Use(async (context, next) =>
     Console.WriteLine($"First Inline Middleware After - Response Status: {context.Response.StatusCode}");
 });
 
+app.UseMiddleware<MyMiddlewareTwo>();
+
+app.UseMiddleware<MyMiddlewareThreeDI>();
+
+// Second Inline Middleware Implementation
 app.Use(async (context, next) =>
 {
     Console.WriteLine($"Second Inline Middleware Before - Request Method: {context.Request.Method}");
