@@ -2373,21 +2373,59 @@ public interface IJwtTokenGenerator
 
 ========== Infrastructure\ JwtTokenGenerator.cs
 
-We will implement this after JWT configuration.
-For now
-
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Ops.Application.Interfaces;
 using Ops.Domain.Entities;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Ops.Infrastructure.Security;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
+    private readonly JwtSettings _jwtSettings;
+
+    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions)
+    {
+        _jwtSettings = jwtOptions.Value;
+    }
+
     public string GenerateToken(User user)
     {
-        throw new NotImplementedException();
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? string.Empty),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
+
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+
+        var credentials = new SigningCredentials(
+            key,
+            SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
+
 
 ==========
 
@@ -2443,12 +2481,15 @@ public class AuthService : IAuthService
         if (!valid)
             throw new UnauthorizedAccessException("Invalid username or password.");
 
+
+        var token = _jwt.GenerateToken(user);
+
         return new LoginResponseDto
         {
             UserId = user.Id,
             UserName = user.UserName!,
             Role = user.Role.ToString(),
-            Token = _jwt.GenerateToken(user),
+            Token = token,
             Expiration = DateTime.UtcNow.AddHours(1)
         };
     }
@@ -2529,15 +2570,992 @@ https://localhost:6004/api/Auth/login
 
 System.NotImplementedException: The method or operation is not implemented.
 
-==========
+=========================================================================== JWT Implementation : Entire JWT Authentication & Authorization module
+
+✔ Step 1
+Install JWT packages
+
+✔ Step 2
+Configure appsettings.json
+
+✔ Step 3
+Create JwtSettings class
+
+✔ Step 4
+Implement JwtTokenGenerator
+
+✔ Step 5
+Register JWT in Dependency Injection
+
+✔ Step 6
+Configure Authentication in Program.cs
+
+✔ Step 7
+Configure Swagger JWT
+
+✔ Step 8
+Test Login
+
+✔ Step 9
+Protect APIs using [Authorize]
+
+✔ Step 10
+Role based authorization
 
 
 ==========
+API
+Program.cs
+appsettings.json
+appsettings.Development.json
 
+Application
+IJwtTokenGenerator.cs (already created)
+
+Infrastructure
+JwtSettings.cs
+JwtTokenGenerator.cs
+DependencyInjection.cs
+
+Swagger
+JWT Security Definition
+JWT Security Requirement
+
+Controllers
+AuthController
+[Authorize]
+[AllowAnonymous]
+
+
+Packages
+System.IdentityModel.Tokens.Jwt
+Microsoft.AspNetCore.Authentication.JwtBearer
 
 
 ==========
 
+## Phase 1 – JWT Authentication (Current)
+
+* JWT login
+* Password hashing
+* Role-based authorization
+* Swagger JWT integration
+
+## Phase 2
+
+* Refresh Token
+* Logout
+* Change Password
+* Forgot Password
+* Reset Password
+
+## Phase 3
+
+* Email verification
+* Account lockout
+* Login history
+* Audit logs
+* MFA (optional)
+
+---
+
+# Final Authentication Architecture
+
+Angular
+    │
+    ▼
+AuthController
+    │
+    ▼
+IAuthService
+    │
+    ▼
+AuthService
+    │
+    ├── IUserRepository
+    ├── IPasswordHasher
+    ├── IJwtTokenGenerator
+    └── ILogger<AuthService>
+            │
+            ▼
+SQL Server
+
+
+---
+
+# Folder Structure
+
+Ops.API
+│
+├── Controllers
+│      AuthController.cs
+│
+├── Middleware
+│      ExceptionMiddleware.cs
+│
+├── Extensions
+│      SwaggerExtensions.cs
+│
+├── appsettings.json
+└── Program.cs
+
+
+Ops.Application
+│
+├── DTOs
+│     Auth
+│         LoginRequestDto.cs
+│         LoginResponseDto.cs
+│
+├── Interfaces
+│     IAuthService.cs
+│     IPasswordHasher.cs
+│     IJwtTokenGenerator.cs
+│
+└── Services
+      AuthService.cs
+
+
+Ops.Infrastructure
+│
+├── Security
+│      JwtSettings.cs
+│      JwtTokenGenerator.cs
+│      PasswordHasher.cs
+│
+└── DependencyInjection.cs
+
+
+---
+
+# Required NuGet Packages
+
+## API
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+
+---
+
+## Infrastructure
+dotnet add package System.IdentityModel.Tokens.Jwt
+dotnet add package Microsoft.AspNetCore.Identity
+dotnet add package Microsoft.Extensions.Options.ConfigurationExtensions
+
+---
+
+# appsettings.json
+{
+  "Jwt": {
+    "Issuer": "OPS101",
+    "Audience": "OPS101Client",
+    "SecretKey": "OPS101@2026_SuperSecretKey_ChangeThis_In_Production_32CharactersMinimum",
+    "ExpiryInMinutes": 60
+  }
+}
+
+Never hardcode the key in production. Store it in Azure Key Vault.
+
+---
+
+# JwtSettings.cs
+
+namespace Ops.Infrastructure.Security;
+
+public class JwtSettings
+{
+    public const string SectionName = "Jwt";
+
+    public string Issuer { get; set; } = string.Empty;
+
+    public string Audience { get; set; } = string.Empty;
+
+    public string SecretKey { get; set; } = string.Empty;
+
+    public int ExpiryInMinutes { get; set; }
+}
+
+
+========== Ops.Infrastructure/DependencyInjection.cs
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
+using Ops.Application.Interfaces;
+using Ops.Infrastructure.Data;
+using Ops.Infrastructure.Repositories;
+using Ops.Infrastructure.Security;
+
+namespace Ops.Infrastructure;
+
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<ApplicationDbContext>(options =>
+        {
+            options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"));
+        });
+
+        services.Configure<JwtSettings>(
+            configuration.GetSection(JwtSettings.SectionName));
+
+        services.AddScoped<IProductRepository, ProductRepository>();
+
+        services.AddScoped<IUserRepository, UserRepository>();
+
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+        return services;
+    }
+}
+
+
+========== Program.cs
+using Ops.API.Middleware;
+using Ops.Application;
+using Ops.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Ops.Infrastructure.Security;
+using System.Text;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddApplication();
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services
+.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(options =>
+{
+    var jwt = builder.Configuration
+        .GetSection(JwtSettings.SectionName);
+
+    options.TokenValidationParameters =
+        new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwt["Issuer"],
+            ValidAudience = jwt["Audience"],
+
+            IssuerSigningKey =
+                new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(jwt["SecretKey"]!))
+        };
+});
+
+
+builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen();
+
+// 1. Add CORS services and define an "AllowAll" policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:4200")
+             //policy.AllowAnyOrigin()
+             .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();  // Required to read the HttpOnly cookie from /v4Get
+    });
+});
+
+builder.Services.AddTransient<MyMiddlewareThreeDI>();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint(
+            "/swagger/v1/swagger.json",
+            "Ops API V1");
+
+        options.RoutePrefix = string.Empty;
+    });
+}
+
+app.UseHttpsRedirection();
+app.UseCors("AllowAll");
+app.UseAuthentication();
+app.UseAuthorization();
+
+// First Inline Middleware Implementation
+app.Use(async (context, next) =>
+{
+    // Logic BEFORE the next middleware (e.g., logging request)
+    Console.WriteLine($"First Inline Middleware Before - Request Method: {context.Request.Method}");
+    Console.WriteLine($"First Inline Middleware Before - Response Status: {context.Response.StatusCode}");
+
+    // Call the next middleware in the pipeline
+    await next(context); //
+
+    // Logic AFTER the next middleware (e.g., logging response status)
+    Console.WriteLine($"First Inline Middleware After - Response Status: {context.Response.StatusCode}");
+});
+
+app.UseMiddleware<MyMiddlewareTwo>();
+
+app.UseMiddleware<MyMiddlewareThreeDI>();
+
+// Second Inline Middleware Implementation
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"Second Inline Middleware Before - Request Method: {context.Request.Method}");
+    await next(context);
+    Console.WriteLine($"Second Inline Middleware After - Response Status: {context.Response.StatusCode}");
+});
+
+app.MapControllers();
+
+//https://localhost:6004/
+app.MapGet("/", () => "Hello World! "); //HTTP GET - Root Route // Minimal API
+//This get request will be accessible from the browser/ JS/ swagger / Postman API/ Thunder Client
+//To access this web api from the frontend application we need to add CORS in Program.cs file
+
+app.MapGet("/v2Get", () => new { message = "Hello World! " });
+
+app.MapGet("/v3Get", () => new { message = "Hello World! ", key = 123, key2 = "Some String" });
+
+app.MapGet("/v4Get", (HttpContext context) =>
+{
+    // 1. Create options for the cookie (Security settings)
+    CookieOptions options = new CookieOptions
+    {
+        HttpOnly = true,       // Prevents JavaScript from reading the cookie (protects against XSS)
+        //Secure = true,         // Ensures cookie is only sent over HTTPS
+        Secure = false,        // http://localhost:4200
+        SameSite = SameSiteMode.Lax, // Allows cookie to be sent on standard cross-site navigations
+        Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Cookie lifespan
+    };
+
+    // 2. Append the cookie to the HTTP response headers
+    context.Response.Cookies.Append("MyUserToken", "SecureValue123", options);
+
+    // 3. Return your JSON payload
+    return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
+});
+
+app.Run();
+
+
+================================= Run the code and 
+
+Auth- POST
+returns token
+
+==========================================================================================================================================================================================
+
+=========================================================================== Reduce the LOCs in Program.cs =======================================================================
+
+
+Type			Interface		Examples
+Service Registration	IServiceCollection	AddControllers(), AddSwaggerGen()
+Middleware Pipeline	IApplicationBuilder	UseAuthentication(), UseCors()
+Endpoint Mapping	IEndpointRouteBuilder	MapControllers(), MapOpenApi(), MapGet()
+
+
+==================== AuthenticationExtensions.cs
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Ops.Infrastructure.Security;
+using System.Text;
+
+namespace Ops.API.Extensions;
+
+public static class AuthenticationExtensions
+{
+    public static IServiceCollection AddJwtAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var jwt = configuration.GetSection(JwtSettings.SectionName);
+
+        services.AddAuthentication(
+            JwtBearerDefaults.AuthenticationScheme)
+
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+
+                        ValidIssuer = jwt["Issuer"],
+
+                        ValidAudience = jwt["Audience"],
+
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(jwt["SecretKey"]!))
+                    };
+            });
+
+        return services;
+    }
+}
+
+==================== CorsExtensions.cs
+
+namespace Ops.API.Extensions;
+
+public static class CorsExtensions
+{
+    public static IServiceCollection AddCorsConfiguration(
+        this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", policy =>
+            {
+                policy.WithOrigins(
+                        "http://127.0.0.1:5500",
+                        "http://localhost:5500",
+                        "http://localhost:4200")
+                //policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+
+                    .AllowAnyMethod()
+
+                    .AllowCredentials(); // Required to read the HttpOnly cookie from /v4Get
+            });
+        });
+
+        return services;
+    }
+}
+
+==================== SwaggerExtensions.cs
+
+using Microsoft.OpenApi;
+//using Microsoft.OpenApi.Models;
+
+namespace Ops.API.Extensions;
+
+public static class SwaggerExtensions
+{
+    public static IServiceCollection AddSwaggerDocumentation(
+        this IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
+
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc(
+                "v1",
+                new OpenApiInfo
+                {
+                    Title = "OPS API",
+
+                    Version = "v1"
+                });
+        });
+
+        return services;
+    }
+}
+
+==================== MiddlewareExtensions.cs
+
+using Ops.API.Middleware;
+
+namespace Ops.API.Extensions;
+
+public static class MiddlewareExtensions
+{
+    public static IServiceCollection AddCustomMiddlewares(
+        this IServiceCollection services)
+    {
+        services.AddTransient<MyMiddlewareThreeDI>();
+
+        return services;
+    }
+
+    public static IApplicationBuilder UseApplicationPipeline(
+        this IApplicationBuilder app)
+    {
+        var env =
+            app.ApplicationServices
+               .GetRequiredService<IWebHostEnvironment>();
+
+        if (env.IsDevelopment())
+        {
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint(
+                    "/swagger/v1/swagger.json",
+                    "OPS API V1");
+
+                c.RoutePrefix = string.Empty;
+            });
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseCors("AllowAll");
+
+        app.UseAuthentication();
+
+        app.UseAuthorization();
+
+        // First Inline Middleware Implementation
+        app.Use(async (context, next) =>
+        {
+            // Logic BEFORE the next middleware (e.g., logging request)
+            Console.WriteLine($"First Inline Middleware Before - Request Method: {context.Request.Method}");
+            Console.WriteLine($"First Inline Middleware Before - Response Status: {context.Response.StatusCode}");
+
+            // Call the next middleware in the pipeline
+            await next(context); //
+
+            // Logic AFTER the next middleware (e.g., logging response status)
+            Console.WriteLine($"First Inline Middleware After - Response Status: {context.Response.StatusCode}");
+        });
+
+        app.UseMiddleware<MyMiddlewareTwo>();
+
+        app.UseMiddleware<MyMiddlewareThreeDI>();
+
+        // Second Inline Middleware Implementation
+        app.Use(async (context, next) =>
+        {
+            Console.WriteLine($"Second Inline Middleware Before - Request Method: {context.Request.Method}");
+            await next(context);
+            Console.WriteLine($"Second Inline Middleware After - Response Status: {context.Response.StatusCode}");
+        });
+
+        return app;
+    }
+}
+
+==================== EndpointExtensions.cs
+
+namespace Ops.API.Extensions;
+
+public static class EndpointExtensions
+{
+    public static IEndpointRouteBuilder MapApplicationEndpoints(
+        this IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapOpenApi();
+        endpoints.MapControllers();
+
+        endpoints.MapGet("/", () => "OPS API is running...");
+
+        endpoints.MapGet("/health", () =>
+        {
+            return Results.Ok(new
+            {
+                Status = "Healthy",
+
+                Time = DateTime.UtcNow
+            });
+        });
+
+        endpoints.MapGet("/v2Get", () => new { message = "Hello World! " });
+
+        endpoints.MapGet("/v3Get", () => new { message = "Hello World! ", key = 123, key2 = "Some String" });
+
+        endpoints.MapGet("/v4Get", (HttpContext context) =>
+        {
+            // 1. Create options for the cookie (Security settings)
+            CookieOptions options = new CookieOptions
+            {
+                HttpOnly = true,       // Prevents JavaScript from reading the cookie (protects against XSS)
+                                       //Secure = true,         // Ensures cookie is only sent over HTTPS
+                Secure = false,        // http://localhost:4200
+                SameSite = SameSiteMode.Lax, // Allows cookie to be sent on standard cross-site navigations
+                Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Cookie lifespan
+            };
+
+            // 2. Append the cookie to the HTTP response headers
+            context.Response.Cookies.Append("MyUserToken", "SecureValue123", options);
+
+            // 3. Return your JSON payload
+            return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
+        });
+
+
+        return endpoints;
+    }
+}
+
+
+==================== Program.cs
+
+using Ops.API.Extensions;
+using Ops.API.Middleware;
+using Ops.Application;
+using Ops.Infrastructure;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddApplication();
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.AddSwaggerDocumentation();
+
+builder.Services.AddCorsConfiguration();
+
+builder.Services.AddControllers();
+
+builder.Services.AddOpenApi();
+
+builder.Services.AddCustomMiddlewares();
+
+var app = builder.Build();
+
+app.UseApplicationPipeline();
+
+app.MapApplicationEndpoints();
+
+app.Run();
+
+
+
+==========================================================================================================================================================================================
+
+==========================================================================================================================================================================================
+
+
+
+# JWT Claims
+
+Include only the information required by the application.
+
+```
+NameIdentifier
+Name
+Email
+Role
+Jti
+```
+
+Avoid storing sensitive information in the token.
+
+---
+
+# JWT Expiry
+
+```
+Access Token
+
+60 minutes
+```
+
+Refresh token will be implemented later.
+
+---
+
+# Roles
+
+```csharp
+Admin
+
+SuperUser
+
+User
+```
+
+Then protect endpoints like:
+
+```csharp
+[Authorize]
+
+public class ProductsController
+```
+
+Admin only
+
+```csharp
+[Authorize(Roles="Admin")]
+```
+
+Admin + SuperUser
+
+```csharp
+[Authorize(Roles="Admin,SuperUser")]
+```
+
+Everyone
+
+```csharp
+[AllowAnonymous]
+```
+
+---
+
+# Swagger
+
+Add Bearer Authentication.
+
+After login
+
+```
+Authorize
+
+Bearer eyJhbGciOiJIUzI1Ni...
+```
+
+Swagger automatically sends the token.
+
+---
+
+# Login Flow
+
+```
+POST /api/auth/login
+
+↓
+
+Find User
+
+↓
+
+Verify Password
+
+↓
+
+Generate JWT
+
+↓
+
+Return Token
+
+↓
+
+Angular Stores Token
+
+↓
+
+Authorization Header
+
+↓
+
+Bearer Token
+
+↓
+
+Protected APIs
+```
+
+---
+
+# Response
+
+```json
+{
+  "userId": 1,
+  "userName": "rupesh",
+  "role": "Admin",
+  "token": "eyJhbGc...",
+  "expiration": "2026-07-16T11:35:22Z"
+}
+```
+
+---
+
+# Global Exception Handling
+
+Avoid returning framework exceptions.
+
+Examples:
+
+```
+401
+
+Invalid username or password
+```
+
+```
+403
+
+You are not authorized.
+```
+
+```
+404
+
+User not found.
+```
+
+---
+
+# Logging
+
+Log
+
+```
+Successful login
+
+Failed login
+
+Password changed
+
+Account locked
+
+JWT expired
+```
+
+Never log passwords or JWTs.
+
+---
+
+# Password Hashing
+
+Continue using
+
+```
+Microsoft.AspNetCore.Identity.PasswordHasher<User>
+```
+
+Do not use SHA256 or MD5.
+
+---
+
+# Authentication Middleware Order
+
+```
+UseHttpsRedirection()
+
+UseAuthentication()
+
+UseAuthorization()
+
+MapControllers()
+```
+
+Authentication must come before authorization.
+
+---
+
+# Future Features
+
+After JWT is working, implement:
+
+```
+Refresh Token
+
+Logout
+
+Forgot Password
+
+Reset Password
+
+Change Password
+
+Email Verification
+
+Lockout
+
+OTP
+
+Audit Logs
+```
+
+---
+
+# Security Improvements for Your Current Code
+
+I also recommend making a few changes to strengthen your current implementation:
+
+### 1. Rename the `Password` property in all DTOs
+
+Keep `Password` only in request DTOs (`CreateUserDto`, `UpdateUserDto`, `LoginRequestDto`). Never expose `PasswordHash` in response DTOs.
+
+### 2. Normalize username and email
+
+Before checking for duplicates:
+
+```csharp
+dto.UserName = dto.UserName.Trim().ToLowerInvariant();
+dto.Email = dto.Email.Trim().ToLowerInvariant();
+```
+
+This prevents users like `Rupesh` and `rupesh` from being treated as different accounts.
+
+### 3. Update passwords only when supplied
+
+In `UpdateAsync` and `PatchAsync`:
+
+```csharp
+if (!string.IsNullOrWhiteSpace(dto.Password))
+{
+    userEntity.PasswordHash = _passwordHasher.HashPassword(dto.Password);
+}
+```
+
+### 4. Add login by email (optional)
+
+Allow users to authenticate with either username or email.
+
+### 5. Replace generic exceptions
+
+Instead of:
+
+```csharp
+throw new InvalidOperationException("Username already exists.");
+```
+
+use a custom exception such as:
+
+```csharp
+throw new ConflictException("Username already exists.");
+```
+
+This integrates cleanly with your global exception middleware and produces consistent HTTP 409 responses.
+
+---
+
+## My recommendation for OPS101
+
+Your architecture is now at a point where it deserves a complete authentication module rather than incremental fixes. I recommend implementing the remaining code in this order:
+
+1. `JwtSettings`
+2. `JwtTokenGenerator`
+3. `Program.cs` JWT configuration
+4. Swagger JWT configuration
+5. `AuthService`
+6. `AuthController`
+7. `[Authorize]` on controllers
+8. Role-based authorization
+9. Global exception handling
+10. Refresh tokens
+
+That will give you a production-style authentication system that is suitable for interviews and serves as a strong foundation for the rest of your Order Processing Solution.
 
 ==========
 
