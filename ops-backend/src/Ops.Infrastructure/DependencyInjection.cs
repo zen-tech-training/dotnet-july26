@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Ops.Application.Interfaces;
 using Ops.Infrastructure.Data;
 using Ops.Infrastructure.Repositories;
+using Ops.Infrastructure.Security;
 
 namespace Ops.Infrastructure;
 
@@ -22,6 +23,10 @@ public static class DependencyInjection
         services.AddScoped<IProductRepository, ProductRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();
+
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }

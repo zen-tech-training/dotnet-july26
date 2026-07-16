@@ -11,11 +11,13 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public UserService(IUserRepository userRepository, IMapper mapper)
+    public UserService(IUserRepository userRepository, IMapper mapper, IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _mapper = mapper;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<IEnumerable<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -44,7 +46,7 @@ public class UserService : IUserService
         var userEntity = _mapper.Map<User>(dto);
 
         // TODO: Apply secure hashing algorithm before saving password
-        // userEntity.Password = _passwordHasher.Hash(dto.Password);
+         userEntity.PasswordHash = _passwordHasher.HashPassword(dto.Password);
 
         await _userRepository.AddAsync(userEntity, cancellationToken);
         await _userRepository.SaveChangesAsync(cancellationToken);
@@ -58,6 +60,7 @@ public class UserService : IUserService
             ?? throw new KeyNotFoundException($"User with ID {id} not found.");
 
         _mapper.Map(dto, userEntity);
+        userEntity.PasswordHash = _passwordHasher.HashPassword(dto.Password);
 
         _userRepository.Update(userEntity);
         await _userRepository.SaveChangesAsync(cancellationToken);
@@ -68,7 +71,11 @@ public class UserService : IUserService
         var userEntity = await _userRepository.GetByIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException($"User with ID {id} not found.");
 
-        _mapper.Map(dto, userEntity);
+        _mapper.Map(dto, userEntity);        
+        if (!string.IsNullOrWhiteSpace(dto.Password))
+        {
+            userEntity.PasswordHash = _passwordHasher.HashPassword(dto.Password);
+        }
 
         _userRepository.Update(userEntity);
         await _userRepository.SaveChangesAsync(cancellationToken);

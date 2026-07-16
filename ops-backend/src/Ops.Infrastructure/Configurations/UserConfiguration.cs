@@ -19,7 +19,8 @@ namespace Ops.Infrastructure.Configurations
                    .HasMaxLength(100)
                    .IsRequired();
 
-            builder.Property(x => x.Password)
+            builder.Property(x => x.PasswordHash)
+                   .IsRequired()
                    .HasMaxLength(500);  // To store the Hashed Pwd
 
             builder.Property(x => x.Role);

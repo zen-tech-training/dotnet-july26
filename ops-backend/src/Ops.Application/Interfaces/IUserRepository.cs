@@ -17,6 +17,10 @@ public interface IUserRepository
         string userName,
         CancellationToken cancellationToken = default);
 
+    Task<User?> GetByEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default);
+
     Task<bool> ExistsAsync(
         int id,
         CancellationToken cancellationToken = default);

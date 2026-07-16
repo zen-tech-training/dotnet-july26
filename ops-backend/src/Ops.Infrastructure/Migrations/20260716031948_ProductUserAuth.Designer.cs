@@ -12,8 +12,8 @@ using Ops.Infrastructure.Data;
 namespace Ops.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260715171304_UserEntityV1")]
-    partial class UserEntityV1
+    [Migration("20260716031948_ProductUserAuth")]
+    partial class ProductUserAuth
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -104,7 +104,8 @@ namespace Ops.Infrastructure.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 

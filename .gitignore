@@ -9,6 +9,7 @@ obj/
 *.exe
 .DS_Store
 Thumbs.db
+ops-backend/src/Ops.API/appsettings.json
 
 # ==================================================
 # Frontend (Angular) Rules

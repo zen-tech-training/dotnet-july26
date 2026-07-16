@@ -2107,6 +2107,465 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 }
+=======================================================================================================================================================================================
+
+=========================================================================== Authentication
+
+Client (Angular)
+
+        │
+
+        ▼
+
+   AuthController
+        │
+        ▼
+   IAuthService
+        │
+        ▼
+    AuthService
+        │
+        ├──────────────► PasswordHasher
+        │
+        ├──────────────► IUserRepository
+        │
+        └──────────────► JwtTokenGenerator
+
+                    │
+
+                    ▼
+
+               SQL Server
+
+
+
+==========
+
+File to Add:
+
+Ops.Application
+│
+├── DTOs
+│
+│   └── Auth
+│        LoginRequestDto.cs
+│        LoginResponseDto.cs
+│
+├── Interfaces
+│
+│   IAuthService.cs
+│
+│   IPasswordHasher.cs
+│
+│   IJwtTokenGenerator.cs
+│
+├── Services
+│   AuthService.cs
+
+
+
+Ops.Infrastructure
+│
+├── Security
+│
+│   PasswordHasher.cs
+│
+│   JwtTokenGenerator.cs
+
+
+Ops.API
+│
+├── Controllers
+│
+│   UsersController.cs
+│
+│   ProductsController.cs
+│
+│   AuthController.cs
+
+
+
+====================
+
+Modify
+
+namespace Ops.Application.Services;
+
+public class UserService : IUserService
+{
+    private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
+    private readonly IPasswordHasher _passwordHasher;
+
+    public UserService(IUserRepository userRepository, IMapper mapper, IPasswordHasher passwordHasher)
+    {
+        _userRepository = userRepository;
+        _mapper = mapper;
+        _passwordHasher = passwordHasher;
+    }
+
+
+public async Task<UserDto> CreateAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
+{
+    if (dto.UserName != null && await _userRepository.ExistsUserNameAsync(dto.UserName, cancellationToken))
+        throw new InvalidOperationException("Username already exists.");
+
+    ..........
+    ..........
+
+    var userEntity = _mapper.Map<User>(dto);
+
+    // TODO: Apply secure hashing algorithm before saving password
+     userEntity.PasswordHash = _passwordHasher.HashPassword(dto.Password);
+
+
+    ..........
+    ..........
+}
+
+public async Task UpdateAsync(int id, UpdateUserDto dto, CancellationToken cancellationToken = default)
+{
+
+    ..........
+    ..........
+    _mapper.Map(dto, userEntity);
+    userEntity.PasswordHash = _passwordHasher.HashPassword(dto.Password);
+    ..........
+    ..........
+}
+public async Task PatchAsync(int id, PatchUserDto dto, CancellationToken cancellationToken = default)
+{
+    ..........
+    ..........
+    _mapper.Map(dto, userEntity);
+    if (!string.IsNullOrWhiteSpace(dto.Password))
+    {
+         userEntity.PasswordHash = _passwordHasher.HashPassword(dto.Password);
+    }
+    ..........
+    ..........
+}
+
+
+
+
+==========
+
+public interface IPasswordHasher
+{
+    string HashPassword(string password);
+
+    bool VerifyPassword(
+        string hashedPassword,
+        string providedPassword);
+}
+
+========
+
+namespace Ops.Domain.Entities
+{
+    public class User : BaseEntity
+    {
+        public string? UserName { get; set; }
+        public string? PasswordHash { get; set; }
+
+========== Infrastructure project
+
+dotnet add package Microsoft.AspNetCore.Identity
+
+
+==========
+using Microsoft.AspNetCore.Identity;
+using Ops.Application.Interfaces;
+using Ops.Domain.Entities;
+
+namespace Ops.Infrastructure.Security;
+
+public class PasswordHasher : IPasswordHasher
+{
+    private readonly Microsoft.AspNetCore.Identity.PasswordHasher<User> _passwordHasher;
+
+    public PasswordHasher()
+    {
+        _passwordHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+    }
+
+    public string HashPassword(string password)
+    {
+        var user = new User();
+
+        return _passwordHasher.HashPassword(user, password);
+    }
+
+    public bool VerifyPassword(
+        string hashedPassword,
+        string providedPassword)
+    {
+        var user = new User();
+
+        var result = _passwordHasher.VerifyHashedPassword(
+            user,
+            hashedPassword,
+            providedPassword);
+
+        return result == PasswordVerificationResult.Success
+            || result == PasswordVerificationResult.SuccessRehashNeeded;
+    }
+}
+
+========== Ops.Infrastructure/Configurations/UserConfiguration.cs
+
+Since you renamed the property change Password to PasswordHash
+
+builder.Property(x => x.PasswordHash)
+       .IsRequired()
+       .HasMaxLength(500);
+
+==========
+
+Ops.Application\Interfaces\IUserRepository
+
+Task<User?> GetByEmailAsync(
+    string email,
+    CancellationToken cancellationToken = default);
+
+
+==========
+
+Ops.Infrastructure\Repositories\UserRepository.cs
+
+public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+{
+    return await _context.Users.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
+}
+
+========== DTOs
+
+namespace Ops.Application.DTOs.Auth;
+public class LoginRequestDto
+{
+    public string UserName { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+
+
+==========
+namespace Ops.Application.DTOs.Auth;
+public class LoginResponseDto
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public string Token { get; set; } = string.Empty;
+    public DateTime Expiration { get; set; }
+}
+
+
+========== Interfaces
+
+using Ops.Domain.Entities;
+namespace Ops.Application.Interfaces;
+public interface IJwtTokenGenerator
+{
+    string GenerateToken(User user);
+}
+
+========== Infrastructure\ JwtTokenGenerator.cs
+
+We will implement this after JWT configuration.
+For now
+
+using Ops.Application.Interfaces;
+using Ops.Domain.Entities;
+
+namespace Ops.Infrastructure.Security;
+
+public class JwtTokenGenerator : IJwtTokenGenerator
+{
+    public string GenerateToken(User user)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+==========
+
+using Ops.Application.DTOs.Auth;
+
+namespace Ops.Application.Interfaces;
+
+public interface IAuthService
+{
+    Task<LoginResponseDto> LoginAsync(
+        LoginRequestDto dto,
+        CancellationToken cancellationToken = default);
+}
+
+========== Service
+
+using Ops.Application.DTOs.Auth;
+using Ops.Application.Interfaces;
+
+namespace Ops.Application.Services;
+
+public class AuthService : IAuthService
+{
+    private readonly IUserRepository _repository;
+    private readonly IPasswordHasher _passwordHasher;
+    private readonly IJwtTokenGenerator _jwt;
+
+    public AuthService(
+        IUserRepository repository,
+        IPasswordHasher passwordHasher,
+        IJwtTokenGenerator jwt)
+    {
+        _repository = repository;
+        _passwordHasher = passwordHasher;
+        _jwt = jwt;
+    }
+
+    public async Task<LoginResponseDto> LoginAsync(
+        LoginRequestDto dto,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await _repository.GetByUserNameAsync(
+            dto.UserName,
+            cancellationToken);
+
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid username or password.");
+
+        bool valid = _passwordHasher.VerifyPassword(
+            user.PasswordHash,
+            dto.Password);
+
+        if (!valid)
+            throw new UnauthorizedAccessException("Invalid username or password.");
+
+        return new LoginResponseDto
+        {
+            UserId = user.Id,
+            UserName = user.UserName!,
+            Role = user.Role.ToString(),
+            Token = _jwt.GenerateToken(user),
+            Expiration = DateTime.UtcNow.AddHours(1)
+        };
+    }
+}
+
+========== Controller
+
+using Microsoft.AspNetCore.Mvc;
+using Ops.Application.DTOs.Auth;
+using Ops.Application.Interfaces;
+
+namespace Ops.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
+{
+    private readonly IAuthService _service;
+
+    public AuthController(IAuthService service)
+    {
+        _service = service;
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(
+        LoginRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        var result = await _service.LoginAsync(
+            dto,
+            cancellationToken);
+
+        return Ok(result);
+    }
+}
+
+
+========== Register Services
+Application DependencyInjection.cs
+
+services.AddScoped<IUserService, UserService>();
+services.AddScoped<IAuthService, AuthService>();
+
+==========
+
+Infrastructure DependencyInjection.cs
+services.AddScoped<IPasswordHasher, PasswordHasher>();
+services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
+
+
+
+==========
+Perform the Migration
+
+
+========== Run
+
+Access https://localhost:6004/index.html
+
+USER: POST request
+
+{
+  "userName": "rupesh",
+  "password": "123456",
+  "role": 0,
+  "mobileNumber": "1234567890",
+  "email": "rupesh@ops.com"
+}
+
+User created successfully but getting error for 
+https://localhost:6004/api/Auth/login
+{
+  "userName": "rupesh",
+  "password": "123456"
+}
+
+System.NotImplementedException: The method or operation is not implemented.
+
+==========
+
+
+==========
+
+
+
+==========
+
+
+==========
+
+
+==========
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
