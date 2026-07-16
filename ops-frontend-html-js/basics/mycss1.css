@@ -1,0 +1,14 @@
+/* style.css */
+
+/* Global styles for all paragraph tags */
+p {
+    color: #333333;             /* Dark grey text */
+    background-color: #f0f0f0;  /* Light grey background */
+    font-size: 56px;            /* Base font size */
+}
+
+/* A helper class to demonstrate overriding */
+.highlight {
+    background-color: #ffeb3b;  /* Yellow background */
+    font-size: 18px;            /* Larger text */
+}

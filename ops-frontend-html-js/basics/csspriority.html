@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Demo</title>
+
+    <!-- 1. EXTERNAL CSS -->
+    <!-- links the external style.css file -->
+    <link rel="stylesheet" href="mycss1.css">
+
+    <!-- 2. INTERNAL CSS -->
+    <!-- Embedded directly inside the head tag -->
+    <style>
+        /* Overrides the external 'p' background color because 
+           Internal CSS comes AFTER External CSS in this file */
+        p {
+            background-color: #e0f7fa; /* Light blue background */
+        }
+
+        /* A class selector has higher specificity than an element selector */
+        .box {
+            color: #ffffff;
+            background-color: #00796b; /* Teal background */
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CSS Types & Overriding Demo</h1>
+
+    <!-- Example A: Demonstrating External vs Internal -->
+    <p>
+        <strong>Example A:</strong> This paragraph gets its 16px font size from the 
+        <em>External CSS</em>. However, its background color is light blue because the 
+        <em>Internal CSS</em> overrides the external light grey background.
+    </p>
+
+    <!-- Example B: Demonstrating Class Specificity -->
+    <p class="highlight">
+        <strong>Example B:</strong> This paragraph uses the class ".highlight" from the 
+        <em>External CSS</em>. The class rules override the general 'p' tag rules, 
+        giving it a yellow background and 18px font size.
+    </p>
+
+    <!-- Example C: Demonstrating Inline CSS Overriding Everything -->
+    <p class="box" style="background-color: #d32f2f; font-size: 24px;">
+        <strong>Example C:</strong> This paragraph uses the internal class ".box" 
+        (which wants a teal background and 20px font), but the 
+        <em>3. INLINE CSS</em> overrides them. It forces a red background and 24px font. 
+        It still keeps the white text color from the ".box" class.
+    </p>
+
+</body>
+</html>
