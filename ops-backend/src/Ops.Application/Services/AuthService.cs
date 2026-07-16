@@ -37,12 +37,14 @@ public class AuthService : IAuthService
         if (!valid)
             throw new UnauthorizedAccessException("Invalid username or password.");
 
+        var token = _jwt.GenerateToken(user);
+
         return new LoginResponseDto
         {
             UserId = user.Id,
             UserName = user.UserName!,
             Role = user.Role.ToString(),
-            Token = _jwt.GenerateToken(user),
+            Token = token,
             Expiration = DateTime.UtcNow.AddHours(1)
         };
     }

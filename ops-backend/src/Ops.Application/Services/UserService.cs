@@ -36,6 +36,7 @@ public class UserService : IUserService
     {
         if (dto.UserName != null && await _userRepository.ExistsUserNameAsync(dto.UserName, cancellationToken))
             throw new InvalidOperationException("Username already exists.");
+            //throw new ConflictException("Username already exists.");
 
         if (dto.Email != null && await _userRepository.ExistsEmailAsync(dto.Email, cancellationToken))
             throw new InvalidOperationException("Email already exists.");

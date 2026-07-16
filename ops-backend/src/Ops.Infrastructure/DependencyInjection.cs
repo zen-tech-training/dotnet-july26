@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Ops.Application.Interfaces;
 using Ops.Infrastructure.Data;
@@ -19,6 +20,9 @@ public static class DependencyInjection
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"));
         });
+
+        services.Configure<JwtSettings>(
+            configuration.GetSection(JwtSettings.SectionName));
 
         services.AddScoped<IProductRepository, ProductRepository>();
 
