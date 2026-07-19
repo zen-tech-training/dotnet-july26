@@ -7,8 +7,12 @@ public static class MiddlewareExtensions
     public static IServiceCollection AddCustomMiddlewares(
         this IServiceCollection services)
     {
-        services.AddTransient<MyMiddlewareThreeDI>();
+        //services.AddTransient<RequestLoggingMiddleware>();  
+        // It is not necessary to register RequestLoggingMiddleware as a service because it is not injected into other services.
+        // It is used directly in the middleware pipeline.
+        //RequestDelegate is not a DI service. It is supplied automatically by ASP.NET Core when you call UseMiddleware<T>().
 
+        services.AddTransient<MyMiddlewareThreeDI>();               
         return services;
     }
 
@@ -37,9 +41,12 @@ public static class MiddlewareExtensions
 
         app.UseCors("AllowAll");
 
+        app.UseMiddleware<RequestLoggingMiddleware>();
+
         app.UseAuthentication();
 
         app.UseAuthorization();
+
 
         // First Inline Middleware Implementation
         app.Use(async (context, next) =>

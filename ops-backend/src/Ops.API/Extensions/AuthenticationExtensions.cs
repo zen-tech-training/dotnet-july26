@@ -36,6 +36,9 @@ public static class AuthenticationExtensions
                     };
             });
 
+        // Register authorization services so [Authorize] and policy-based checks work
+        services.AddAuthorization();
+
         return services;
     }
 }

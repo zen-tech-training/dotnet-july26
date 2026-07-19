@@ -2970,7 +2970,7 @@ returns token
 
 ==========================================================================================================================================================================================
 
-=========================================================================== Reduce the LOCs in Program.cs =======================================================================
+=========================================================================== Reduce the LOCs in Program.cs using Extension methods for IServiceCollection =================================
 
 
 Type			Interface		Examples
@@ -3246,9 +3246,729 @@ app.Run();
 
 
 
-==========================================================================================================================================================================================
+============================================================================================================================================================================================
+                                                                                    Serilog
+============================================================================================================================================================================================
 
-==========================================================================================================================================================================================
+Install Packages
+From Ops.API
+
+dotnet add package Serilog.AspNetCore
+dotnet add package Serilog.Settings.Configuration
+dotnet add package Serilog.Sinks.Console
+dotnet add package Serilog.Sinks.File
+
+Later we will also add:
+dotnet add package Serilog.Sinks.ApplicationInsights
+
+====================
+
+appsettings.json
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=opsdbjuly26;Trusted_Connection=True;Encrypt=False;"
+  },
+  "Jwt": {
+    "Issuer": "OPS101",
+    "Audience": "OPS101Client",
+    "SecretKey": "OPS101@2026_SuperSecretKey_ChangeThis_In_Production_32CharactersMinimum",
+    "ExpiryInMinutes": 60
+  },
+  "Serilog": {
+    "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.File" ],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "Microsoft.AspNetCore": "Warning",
+        "System": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console"
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "Logs/log-.txt",
+          "rollingInterval": "Day",
+          "retainedFileCountLimit": 30,
+          "shared": true
+        }
+      }
+    ],
+    "Enrich": [
+      "FromLogContext",
+      "WithMachineName",
+      "WithThreadId"
+    ]
+  }
+}
+
+
+
+Note: "Microsoft.Hosting.Lifetime": "Information" is required to see the Application startup logs
+
+
+==================== Program.cs
+
+using Ops.API.Extensions;
+using Ops.API.Middleware;
+using Ops.Application;
+using Ops.Infrastructure;
+using Serilog;   //----------- added
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>      //----------- added
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+});
+
+builder.Services.AddApplication();
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.AddSwaggerDocumentation();
+
+builder.Services.AddCorsConfiguration();
+
+builder.Services.AddControllers();
+
+builder.Services.AddOpenApi();
+
+builder.Services.AddCustomMiddlewares();
+
+var app = builder.Build();
+
+app.UseApplicationPipeline();
+
+app.MapApplicationEndpoints();
+
+app.Run();
+==================== RequestLoggingMiddleware.cs
+
+namespace Ops.API.Middleware
+{
+    public class RequestLoggingMiddleware
+    {
+        private readonly RequestDelegate _next;
+
+        private readonly ILogger<RequestLoggingMiddleware> _logger;
+
+        public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
+        {
+            _next = next;
+            _logger = logger;
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            _logger.LogInformation("HTTP {Method} {Url}", context.Request.Method, context.Request.Path);
+
+            await _next(context);
+
+            _logger.LogInformation("Response {StatusCode}", context.Response.StatusCode);
+        }
+    }
+}
+
+==================== MiddlewareExtensions.cs
+
+using Ops.API.Middleware;
+
+namespace Ops.API.Extensions;
+
+public static class MiddlewareExtensions
+{
+    public static IServiceCollection AddCustomMiddlewares(
+        this IServiceCollection services)
+    {
+        //services.AddTransient<RequestLoggingMiddleware>();  
+        // It is not necessary to register RequestLoggingMiddleware as a service because it is not injected into other services.
+        // It is used directly in the middleware pipeline.
+        //RequestDelegate is not a DI service. It is supplied automatically by ASP.NET Core when you call UseMiddleware<T>().
+
+        services.AddTransient<MyMiddlewareThreeDI>();               
+        return services;
+    }
+
+    public static IApplicationBuilder UseApplicationPipeline(
+        this IApplicationBuilder app)
+    {
+        var env =
+            app.ApplicationServices
+               .GetRequiredService<IWebHostEnvironment>();
+
+        if (env.IsDevelopment())
+        {
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint(
+                    "/swagger/v1/swagger.json",
+                    "OPS API V1");
+
+                c.RoutePrefix = string.Empty;
+            });
+        }
+
+        app.UseHttpsRedirection();
+
+        app.UseCors("AllowAll");
+
+        app.UseMiddleware<RequestLoggingMiddleware>();
+
+        app.UseAuthentication();
+
+        app.UseAuthorization();
+
+
+        // First Inline Middleware Implementation
+        app.Use(async (context, next) =>
+        {
+            // Logic BEFORE the next middleware (e.g., logging request)
+            Console.WriteLine($"First Inline Middleware Before - Request Method: {context.Request.Method}");
+            Console.WriteLine($"First Inline Middleware Before - Response Status: {context.Response.StatusCode}");
+
+            // Call the next middleware in the pipeline
+            await next(context); //
+
+            // Logic AFTER the next middleware (e.g., logging response status)
+            Console.WriteLine($"First Inline Middleware After - Response Status: {context.Response.StatusCode}");
+        });
+
+        app.UseMiddleware<MyMiddlewareTwo>();
+
+        app.UseMiddleware<MyMiddlewareThreeDI>();
+
+        // Second Inline Middleware Implementation
+        app.Use(async (context, next) =>
+        {
+            Console.WriteLine($"Second Inline Middleware Before - Request Method: {context.Request.Method}");
+            await next(context);
+            Console.WriteLine($"Second Inline Middleware After - Response Status: {context.Response.StatusCode}");
+        });
+
+        return app;
+    }
+}
+
+==================== Run the Project and observe the console logs
+
+[23:17:37 INF] Now listening on: https://localhost:6004
+[23:17:37 INF] Application started. Press Ctrl+C to shut down.
+[23:17:37 INF] Hosting environment: Development
+[23:17:37 INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API
+[23:18:11 INF] HTTP GET /api/Users
+First Inline Middleware Before - Request Method: GET
+First Inline Middleware Before - Response Status: 200
+[23:18:11 INF] MyMiddlewareTwo - Before next middleware
+MyMiddlewareThreeDI - Before next middleware
+
+============================================================================================================================================================================================
+                                                                                    Authorization
+============================================================================================================================================================================================
+# STEP 2 Swagger JWT Integration
+
+This should go into your existing
+
+```
+SwaggerExtensions.cs
+```
+
+Replace
+
+```csharp
+services.AddSwaggerGen();
+```
+
+with
+
+```csharp
+using Microsoft.OpenApi.Models;
+
+services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1",
+        new OpenApiInfo
+        {
+            Title = "OPS API",
+            Version = "v1"
+        });
+
+    options.AddSecurityDefinition(
+        "Bearer",
+        new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+
+            Type = SecuritySchemeType.Http,
+
+            Scheme = "Bearer",
+
+            BearerFormat = "JWT",
+
+            In = ParameterLocation.Header,
+
+            Description =
+                "Enter JWT Token.\n\nExample:\nBearer eyJhbGc..."
+        });
+
+    options.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference =
+                        new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+
+                            Id = "Bearer"
+                        }
+                },
+                Array.Empty<string>()
+            }
+        });
+});
+
+
+
+
+================================================================================ resolution of error
+
+Error:
+The type or namespace name 'Models' does not exist in the namespace 'Microsoft.OpenApi' (are you missing an assembly reference?)
+
+
+
+
+Ops.API.csproj file content: 
+
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ops.Application\Ops.Application.csproj" />
+    <ProjectReference Include="..\Ops.Infrastructure\Ops.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Filters\" />
+    <Folder Include="Swagger\" />
+  </ItemGroup>
+
+</Project>
+
+
+==========================
+
+
+dotnet list .\src\Ops.API\Ops.API.csproj package
+dotnet list .\src\Ops.API\Ops.API.csproj package --include-transitive
+
+
+C:\Projects\dotnet\dotnet-july26\ops-backend>dotnet list .\src\Ops.API\Ops.API.csproj package
+Restore succeeded with 5 warning(s) in 0.7s
+Build succeeded with 5 warning(s) in 1.2s
+Project 'Ops.API' has the following package references
+   [net10.0]:
+   Top-level Package                                    Requested   Resolved
+   > Microsoft.AspNetCore.Authentication.JwtBearer      10.0.10     10.0.10
+   > Microsoft.AspNetCore.OpenApi                       10.0.9      10.0.9
+   > Microsoft.EntityFrameworkCore.Design               10.0.9      10.0.9
+   > Microsoft.EntityFrameworkCore.SqlServer            10.0.9      10.0.9
+   > Microsoft.EntityFrameworkCore.Tools                10.0.9      10.0.9
+   > Serilog.AspNetCore                                 10.0.0      10.0.0
+   > Serilog.Settings.Configuration                     10.0.1      10.0.1
+   > Serilog.Sinks.Console                              6.1.1       6.1.1
+   > Serilog.Sinks.File                                 7.0.0       7.0.0
+   > Swashbuckle.AspNetCore                             10.2.3      10.2.3
+
+
+
+==============
+
+
+C:\Projects\dotnet\dotnet-july26\ops-backend>dotnet list .\src\Ops.API\Ops.API.csproj package --include-transitive
+
+Project 'Ops.API' has the following package references
+   [net10.0]:
+   Top-level Package                                    Requested   Resolved
+   > Microsoft.AspNetCore.Authentication.JwtBearer      10.0.10     10.0.10
+   > Microsoft.AspNetCore.OpenApi                       10.0.9      10.0.9
+   > Microsoft.EntityFrameworkCore.Design               10.0.9      10.0.9
+   > Microsoft.EntityFrameworkCore.SqlServer            10.0.9      10.0.9
+   > Microsoft.EntityFrameworkCore.Tools                10.0.9      10.0.9
+   > Serilog.AspNetCore                                 10.0.0      10.0.0
+   > Serilog.Settings.Configuration                     10.0.1      10.0.1
+   > Serilog.Sinks.Console                              6.1.1       6.1.1
+   > Serilog.Sinks.File                                 7.0.0       7.0.0
+   > Swashbuckle.AspNetCore                             10.2.3      10.2.3
+
+   Transitive Package                                         Resolved
+   > AutoMapper                                               12.0.1
+   > AutoMapper.Extensions.Microsoft.DependencyInjection      12.0.1
+   > Azure.Core                                               1.47.1
+   > Azure.Identity                                           1.14.2
+   > FluentValidation                                         12.1.1
+   > FluentValidation.DependencyInjectionExtensions           12.1.1
+   > Humanizer.Core                                           2.14.1
+   > Microsoft.Bcl.AsyncInterfaces                            8.0.0
+   > Microsoft.Bcl.Cryptography                               10.0.2
+   > Microsoft.Build.Framework                                18.0.2
+   > Microsoft.CodeAnalysis.Analyzers                         3.11.0
+   > Microsoft.CodeAnalysis.Common                            5.0.0
+   > Microsoft.CodeAnalysis.CSharp                            5.0.0
+   > Microsoft.CodeAnalysis.CSharp.Workspaces                 5.0.0
+   > Microsoft.CodeAnalysis.Workspaces.Common                 5.0.0
+   > Microsoft.CodeAnalysis.Workspaces.MSBuild                5.0.0
+   > Microsoft.Data.SqlClient                                 6.1.1
+   > Microsoft.Data.SqlClient.SNI.runtime                     6.0.2
+   > Microsoft.EntityFrameworkCore                            10.0.9
+   > Microsoft.EntityFrameworkCore.Abstractions               10.0.9
+   > Microsoft.EntityFrameworkCore.Analyzers                  10.0.9
+   > Microsoft.EntityFrameworkCore.Relational                 10.0.9
+   > Microsoft.Extensions.ApiDescription.Server               10.0.0
+   > Microsoft.Extensions.DependencyModel                     10.0.9
+   > Microsoft.Identity.Client                                4.73.1
+   > Microsoft.Identity.Client.Extensions.Msal                4.73.1
+   > Microsoft.IdentityModel.Abstractions                     8.19.2
+   > Microsoft.IdentityModel.JsonWebTokens                    8.19.2
+   > Microsoft.IdentityModel.Logging                          8.19.2
+   > Microsoft.IdentityModel.Protocols                        8.19.2
+   > Microsoft.IdentityModel.Protocols.OpenIdConnect          8.19.2
+   > Microsoft.IdentityModel.Tokens                           8.19.2
+   > Microsoft.OpenApi                                        2.7.5
+   > Microsoft.SqlServer.Server                               1.0.0
+   > Microsoft.VisualStudio.SolutionPersistence               1.0.52
+   > Mono.TextTemplating                                      3.0.0
+   > Newtonsoft.Json                                          13.0.3
+   > Serilog                                                  4.3.0
+   > Serilog.Extensions.Hosting                               10.0.0
+   > Serilog.Extensions.Logging                               10.0.0
+   > Serilog.Formatting.Compact                               3.0.0
+   > Serilog.Sinks.Debug                                      3.0.0
+   > Swashbuckle.AspNetCore.Swagger                           10.2.3
+   > Swashbuckle.AspNetCore.SwaggerGen                        10.2.3
+   > Swashbuckle.AspNetCore.SwaggerUI                         10.2.3
+   > System.ClientModel                                       1.5.1
+   > System.CodeDom                                           6.0.0
+   > System.Composition                                       9.0.0
+   > System.Composition.AttributedModel                       9.0.0
+   > System.Composition.Convention                            9.0.0
+   > System.Composition.Hosting                               9.0.0
+   > System.Composition.Runtime                               9.0.0
+   > System.Composition.TypedParts                            9.0.0
+   > System.Configuration.ConfigurationManager                9.0.4
+   > System.IdentityModel.Tokens.Jwt                          8.19.2
+   > System.Memory.Data                                       8.0.1
+   > System.Security.Cryptography.Pkcs                        9.0.4
+   > System.Security.Cryptography.ProtectedData               9.0.4
+
+
+
+=================================
+Add
+
+<ItemGroup>
+  <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+</ItemGroup>
+
+==================================
+
+Change from 10 to 9
+<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" /> 
+to
+<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+============
+
+
+Run project.
+
+Swagger now shows
+
+```
+Authorize
+```
+
+Click
+
+```
+Bearer eyJhbGc.....
+```
+
+Now every API automatically sends the token.
+
+---
+
+# STEP 3 Authorization
+
+Authentication says
+
+> Who are you?
+
+Authorization says
+
+> What are you allowed to do?
+
+---
+
+## Add Roles
+
+You already have
+
+```csharp
+UserRole
+```
+
+```csharp
+Admin
+
+SuperUser
+
+User
+```
+
+Perfect.
+
+---
+
+# JwtTokenGenerator
+
+Make sure Role is inside JWT.
+
+```csharp
+new Claim(
+    ClaimTypes.Role,
+    user.Role.ToString())
+```
+
+---
+
+# Protect Controllers
+
+Anyone logged in
+
+```csharp
+[Authorize]
+```
+
+Example
+
+```csharp
+[Authorize]
+[ApiController]
+public class ProductsController
+```
+
+---
+
+Admin only
+
+```csharp
+[Authorize(Roles = "Admin")]
+```
+
+---
+
+Admin + SuperUser
+
+```csharp
+[Authorize(Roles = "Admin,SuperUser")]
+```
+
+---
+
+Public endpoint
+
+```csharp
+[AllowAnonymous]
+```
+
+Login
+
+```csharp
+[AllowAnonymous]
+[HttpPost("login")]
+```
+
+Register
+
+```csharp
+[AllowAnonymous]
+```
+
+---
+
+# Example
+
+Users
+
+```csharp
+[Authorize(Roles="Admin")]
+```
+
+Products
+
+```csharp
+[Authorize]
+```
+
+Orders
+
+```csharp
+[Authorize]
+```
+
+Payments
+
+```csharp
+[Authorize(Roles="Admin,SuperUser")]
+```
+
+Inventory
+
+```csharp
+[Authorize(Roles="Admin")]
+```
+
+---
+
+# Verify
+
+Login
+
+```
+POST
+
+/api/Auth/login
+```
+
+Receive token
+
+↓
+
+Swagger
+
+Authorize
+
+↓
+
+Paste
+
+```
+Bearer eyJhbGc.....
+```
+
+↓
+
+Call
+
+```
+GET /Products
+```
+
+Works.
+
+---
+
+Call
+
+```
+GET /Users
+```
+
+If logged-in user isn't Admin
+
+↓
+
+```
+403 Forbidden
+```
+
+Exactly what we want.
+
+---
+
+
+
+
+
+
+============================================================================================================================================================================================
+                                                                                    Serilog
+============================================================================================================================================================================================
+
+
+# What I'd implement next
+
+Once these three are complete, I'd continue with:
+
+1. **Global Exception Middleware** (returning consistent `ProblemDetails` responses)
+2. **Custom authorization policies** (e.g., `CanManageProducts`, `CanViewReports`) instead of relying only on role names
+3. **Refresh Token implementation**
+4. **Audit Logging** (who changed what and when)
+5. **Application Insights integration** for Azure
+6. **Health Checks** (`/health`) and readiness probes
+7. **Rate Limiting** to protect public endpoints
+
+At that point, your backend architecture will closely resemble what many enterprise ASP.NET Core applications use in production, making it an excellent foundation before you start implementing Orders, Inventory, Customers, and Payments.
+
+
+
+============================================================================================================================================================================================
+                                                                                    Serilog
+============================================================================================================================================================================================
+
+
+
+
+============================================================================================================================================================================================
+                                                                                    Serilog
+============================================================================================================================================================================================
 
 
 

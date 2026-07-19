@@ -1,0 +1,5 @@
+2026-07-19 11:05:03.150 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-19 11:05:03.425 +05:30 [INF] Now listening on: http://localhost:6005
+2026-07-19 11:05:04.537 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-19 11:05:04.544 +05:30 [INF] Hosting environment: Development
+2026-07-19 11:05:04.554 +05:30 [INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API

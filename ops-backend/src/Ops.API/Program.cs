@@ -2,8 +2,17 @@ using Ops.API.Extensions;
 using Ops.API.Middleware;
 using Ops.Application;
 using Ops.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+});
 
 builder.Services.AddApplication();
 
@@ -17,7 +26,7 @@ builder.Services.AddCorsConfiguration();
 
 builder.Services.AddControllers();
 
-builder.Services.AddOpenApi();
+//builder.Services.AddOpenApi();
 
 builder.Services.AddCustomMiddlewares();
 
@@ -28,6 +37,15 @@ app.UseApplicationPipeline();
 app.MapApplicationEndpoints();
 
 app.Run();
+
+
+
+
+
+
+
+
+
 
 
 //using Ops.API.Middleware;

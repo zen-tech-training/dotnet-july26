@@ -5,7 +5,6 @@ public static class EndpointExtensions
     public static IEndpointRouteBuilder MapApplicationEndpoints(
         this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapOpenApi();
         endpoints.MapControllers();
 
         endpoints.MapGet("/", () => "OPS API is running...");

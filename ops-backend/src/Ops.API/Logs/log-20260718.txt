@@ -1,0 +1,25 @@
+2026-07-18 23:03:33.928 +05:30 [INF] HTTP GET /_framework/aspnetcore-browser-refresh.js
+2026-07-18 23:03:34.127 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-18 23:03:34.131 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-18 23:03:34.136 +05:30 [INF] Response 404
+2026-07-18 23:03:35.793 +05:30 [INF] HTTP GET /_framework/aspnetcore-browser-refresh.js
+2026-07-18 23:03:35.797 +05:30 [INF] HTTP GET /_vs/browserLink
+2026-07-18 23:03:35.829 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-18 23:03:35.860 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-18 23:03:35.860 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-18 23:03:35.863 +05:30 [INF] Response 404
+2026-07-18 23:03:35.873 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-18 23:03:35.876 +05:30 [INF] Response 404
+2026-07-18 23:03:43.363 +05:30 [INF] HTTP GET /api/Users
+2026-07-18 23:03:43.369 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-18 23:03:45.770 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-18 23:03:45.772 +05:30 [INF] Response 200
+2026-07-18 23:17:37.628 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-18 23:17:37.655 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-18 23:17:37.656 +05:30 [INF] Hosting environment: Development
+2026-07-18 23:17:37.658 +05:30 [INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API
+2026-07-18 23:18:11.085 +05:30 [INF] HTTP GET /api/Users
+2026-07-18 23:18:11.136 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-18 23:18:12.946 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-18 23:18:12.952 +05:30 [INF] Response 200
+2026-07-18 23:26:47.286 +05:30 [INF] Application is shutting down...
