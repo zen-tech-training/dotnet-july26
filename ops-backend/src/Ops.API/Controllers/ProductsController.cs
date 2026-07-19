@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Ops.Application.DTOs.Product;
 using Ops.Application.Interfaces;
 
@@ -25,7 +26,7 @@ public class ProductsController : ControllerBase
 
         return Ok(products);
     }
-
+        
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(
         int id,
@@ -42,6 +43,7 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create(
         CreateProductDto dto,
@@ -58,6 +60,7 @@ public class ProductsController : ControllerBase
             product);
     }
 
+    [Authorize]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
@@ -72,6 +75,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
+    [Authorize]
     [HttpPatch("{id:int}")]
     public async Task<IActionResult> Patch(
         int id,
@@ -86,6 +90,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "Admin,SuperUser")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(
         int id,

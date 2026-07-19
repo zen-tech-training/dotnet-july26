@@ -3,3 +3,35 @@
 2026-07-19 11:05:04.537 +05:30 [INF] Application started. Press Ctrl+C to shut down.
 2026-07-19 11:05:04.544 +05:30 [INF] Hosting environment: Development
 2026-07-19 11:05:04.554 +05:30 [INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API
+2026-07-19 16:36:48.567 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-19 16:36:49.453 +05:30 [INF] Now listening on: http://localhost:6005
+2026-07-19 16:36:50.737 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-19 16:36:50.795 +05:30 [INF] Hosting environment: Development
+2026-07-19 16:36:50.862 +05:30 [INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API
+2026-07-19 16:37:21.769 +05:30 [INF] HTTP GET /api/Products
+2026-07-19 16:37:21.987 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-19 16:37:26.397 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-19 16:37:26.400 +05:30 [INF] Response 200
+2026-07-19 16:37:48.263 +05:30 [INF] HTTP POST /api/Products
+2026-07-19 16:37:48.313 +05:30 [INF] Response 401
+2026-07-19 16:38:07.223 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-19 16:38:07.229 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-19 16:38:08.697 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-19 16:38:08.700 +05:30 [INF] Response 200
+2026-07-19 16:38:36.823 +05:30 [INF] HTTP POST /api/Products
+2026-07-19 16:38:36.974 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-19 16:38:37.803 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-19 16:38:37.816 +05:30 [INF] Response 201
+2026-07-19 16:38:44.860 +05:30 [INF] HTTP GET /api/Products
+2026-07-19 16:38:44.863 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-19 16:38:45.568 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-19 16:38:45.696 +05:30 [INF] Response 200
+2026-07-19 16:39:42.641 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-19 16:39:42.744 +05:30 [INF] Now listening on: http://localhost:6005
+2026-07-19 16:39:42.875 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-19 16:39:42.879 +05:30 [INF] Hosting environment: Development
+2026-07-19 16:39:43.128 +05:30 [INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API
+2026-07-19 16:39:47.389 +05:30 [INF] HTTP GET /api/Products
+2026-07-19 16:39:47.822 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-19 16:39:53.447 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-19 16:39:53.461 +05:30 [INF] Response 200

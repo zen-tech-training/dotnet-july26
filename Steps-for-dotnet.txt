@@ -3483,127 +3483,8 @@ First Inline Middleware Before - Response Status: 200
 MyMiddlewareThreeDI - Before next middleware
 
 ============================================================================================================================================================================================
-                                                                                    Authorization
+                                                                                    Authorization & Swagger Intergration
 ============================================================================================================================================================================================
-# STEP 2 Swagger JWT Integration
-
-This should go into your existing
-
-```
-SwaggerExtensions.cs
-```
-
-Replace
-
-```csharp
-services.AddSwaggerGen();
-```
-
-with
-
-```csharp
-using Microsoft.OpenApi.Models;
-
-services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1",
-        new OpenApiInfo
-        {
-            Title = "OPS API",
-            Version = "v1"
-        });
-
-    options.AddSecurityDefinition(
-        "Bearer",
-        new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-
-            Type = SecuritySchemeType.Http,
-
-            Scheme = "Bearer",
-
-            BearerFormat = "JWT",
-
-            In = ParameterLocation.Header,
-
-            Description =
-                "Enter JWT Token.\n\nExample:\nBearer eyJhbGc..."
-        });
-
-    options.AddSecurityRequirement(
-        new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference =
-                        new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-
-                            Id = "Bearer"
-                        }
-                },
-                Array.Empty<string>()
-            }
-        });
-});
-
-
-
-
-================================================================================ resolution of error
-
-Error:
-The type or namespace name 'Models' does not exist in the namespace 'Microsoft.OpenApi' (are you missing an assembly reference?)
-
-
-
-
-Ops.API.csproj file content: 
-
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Ops.Application\Ops.Application.csproj" />
-    <ProjectReference Include="..\Ops.Infrastructure\Ops.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Filters\" />
-    <Folder Include="Swagger\" />
-  </ItemGroup>
-
-</Project>
-
-
-==========================
 
 
 dotnet list .\src\Ops.API\Ops.API.csproj package
@@ -3710,140 +3591,294 @@ Project 'Ops.API' has the following package references
 
 
 
-=================================
-Add
+==================== Ops.API.csproj
+Packages need to be added and removed from Ops.API.csproj. 
+To remove the Error in the future:
+The type or namespace name 'Models' does not exist in the namespace 'Microsoft.OpenApi' (are you missing an assembly reference?)
 
-<ItemGroup>
-  <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
-</ItemGroup>
 
-==================================
+Remove:
+<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
 
-Change from 10 to 9
-<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" /> 
-to
-<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
-============
+Degrade the version:
+<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+
+
+==========
+
+Ops.API.csproj file content:
+
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ops.Application\Ops.Application.csproj" />
+    <ProjectReference Include="..\Ops.Infrastructure\Ops.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Filters\" />
+    <Folder Include="Swagger\" />
+  </ItemGroup>
+
+</Project>
+
+==================== AuthenticationExtensions.cs
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Ops.Infrastructure.Security;
+using System.Text;
+
+namespace Ops.API.Extensions;
+
+public static class AuthenticationExtensions
+{
+    public static IServiceCollection AddJwtAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var jwt = configuration.GetSection(JwtSettings.SectionName);
+
+        services.AddAuthentication(
+            JwtBearerDefaults.AuthenticationScheme)
+
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+
+                        ValidIssuer = jwt["Issuer"],
+
+                        ValidAudience = jwt["Audience"],
+
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(jwt["SecretKey"]!))
+                    };
+            });
+
+        // Register authorization services so [Authorize] and policy-based checks work
+        services.AddAuthorization();                                                          // Added 
+
+        return services;
+    }
+}
+
+
+==================== EndpointExtensions.cs
+
+Note: removed endpoints.MapOpenApi();
+
+
+namespace Ops.API.Extensions;
+
+public static class EndpointExtensions
+{
+    public static IEndpointRouteBuilder MapApplicationEndpoints(
+        this IEndpointRouteBuilder endpoints)
+    {
+        endpoints.MapControllers();
+
+        endpoints.MapGet("/", () => "OPS API is running...");
+
+        endpoints.MapGet("/health", () =>
+        {
+            return Results.Ok(new
+            {
+                Status = "Healthy",
+
+                Time = DateTime.UtcNow
+            });
+        });
+
+        endpoints.MapGet("/v2Get", () => new { message = "Hello World! " });
+
+        endpoints.MapGet("/v3Get", () => new { message = "Hello World! ", key = 123, key2 = "Some String" });
+
+        endpoints.MapGet("/v4Get", (HttpContext context) =>
+        {
+            // 1. Create options for the cookie (Security settings)
+            CookieOptions options = new CookieOptions
+            {
+                HttpOnly = true,       // Prevents JavaScript from reading the cookie (protects against XSS)
+                                       //Secure = true,         // Ensures cookie is only sent over HTTPS
+                Secure = false,        // http://localhost:4200
+                SameSite = SameSiteMode.Lax, // Allows cookie to be sent on standard cross-site navigations
+                Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Cookie lifespan
+            };
+
+            // 2. Append the cookie to the HTTP response headers
+            context.Response.Cookies.Append("MyUserToken", "SecureValue123", options);
+
+            // 3. Return your JSON payload
+            return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
+        });
+
+
+        return endpoints;
+    }
+}
+
+==================== SwaggerExtensions.cs
+
+using Microsoft.OpenApi.Models;
+
+namespace Ops.API.Extensions;
+
+public static class SwaggerExtensions
+{
+    public static IServiceCollection AddSwaggerDocumentation(
+        this IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
+
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc(
+                "v1",
+                new OpenApiInfo
+                {
+                    Title = "OPS API",
+                    Version = "v1"
+                });
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Description = "Enter 'Bearer' [space] and then your valid token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\""
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "bearer",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
+
+        return services;
+    }
+}
+
+==================== program.cs
+
+using Ops.API.Extensions;
+using Ops.API.Middleware;
+using Ops.Application;
+using Ops.Infrastructure;
+using Serilog;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+});
+
+builder.Services.AddApplication();
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.AddSwaggerDocumentation();
+
+builder.Services.AddCorsConfiguration();
+
+builder.Services.AddControllers();
+
+//builder.Services.AddOpenApi();
+
+builder.Services.AddCustomMiddlewares();
+
+var app = builder.Build();
+
+app.UseApplicationPipeline();
+
+app.MapApplicationEndpoints();
+
+app.Run();
+
+====================
 
 
 Run project.
 
-Swagger now shows
+Swagger now shows "Authorize" button. Click it 
 
-```
-Authorize
-```
+Enter the value : eyJhbGc.....
 
-Click
-
-```
-Bearer eyJhbGc.....
-```
+Don't type "Bearer" word. 
 
 Now every API automatically sends the token.
 
----
 
-# STEP 3 Authorization
 
-Authentication says
 
-> Who are you?
+==================== Authorization
 
-Authorization says
+Modify ProductsController.cs file:
 
-> What are you allowed to do?
 
----
-
-## Add Roles
-
-You already have
-
-```csharp
-UserRole
-```
-
-```csharp
-Admin
-
-SuperUser
-
-User
-```
-
-Perfect.
-
----
-
-# JwtTokenGenerator
-
-Make sure Role is inside JWT.
-
-```csharp
-new Claim(
-    ClaimTypes.Role,
-    user.Role.ToString())
-```
-
----
-
-# Protect Controllers
-
-Anyone logged in
-
-```csharp
 [Authorize]
-```
+[HttpPost]
+public async Task<IActionResult> Create(...........)
 
-Example
-
-```csharp
-[Authorize]
-[ApiController]
-public class ProductsController
-```
-
----
-
-Admin only
-
-```csharp
 [Authorize(Roles = "Admin")]
-```
 
----
-
-Admin + SuperUser
-
-```csharp
 [Authorize(Roles = "Admin,SuperUser")]
-```
 
----
-
-Public endpoint
-
-```csharp
-[AllowAnonymous]
-```
-
-Login
-
-```csharp
 [AllowAnonymous]
 [HttpPost("login")]
-```
 
 Register
-
-```csharp
 [AllowAnonymous]
-```
-
----
-
-# Example
 
 Users
 
@@ -3876,66 +3911,8 @@ Inventory
 ```
 
 ---
-
-# Verify
-
-Login
-
-```
-POST
-
-/api/Auth/login
-```
-
-Receive token
-
-↓
-
-Swagger
-
-Authorize
-
-↓
-
-Paste
-
-```
-Bearer eyJhbGc.....
-```
-
-↓
-
-Call
-
-```
-GET /Products
-```
-
-Works.
-
----
-
-Call
-
-```
-GET /Users
-```
-
 If logged-in user isn't Admin
-
-↓
-
-```
 403 Forbidden
-```
-
-Exactly what we want.
-
----
-
-
-
-
 
 
 ============================================================================================================================================================================================
