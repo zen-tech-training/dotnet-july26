@@ -1,0 +1,35 @@
+.navbar {
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 3px 10px rgba(0,0,0,.18);
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+.brand mat-icon {
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+}
+.spacer {
+    flex: 1;
+}
+a {
+    margin-right: 8px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+.active {
+    background: rgba(255,255,255,.18);
+}
+button {
+    margin-left: 10px;
+}

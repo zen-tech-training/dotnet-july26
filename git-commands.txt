@@ -1,0 +1,29 @@
+git fetch origin
+
+
+To see only the names of the files that changed:
+git diff --name-status origin/main
+
+
+To see changes that are ready to commit vs. remote:
+git diff origin/main
+
+
+To see the difference between your last commit and their last commit:
+git diff HEAD..origin/main
+
+
+Check the Commit Logs First.
+If you want to see a list of the commit messages your colleague pushed before looking at individual lines of code, run:
+git log HEAD..origin/main --oneline
+
+
+C:\Projects\dotnet\dotnet-july26>git diff origin/main -- Steps-for-dotnet.txt
+
+git diff HEAD..origin/main -- path/to/Steps-for-dotnet.txt
+
+
+
+=========
+
+^\s*$\n

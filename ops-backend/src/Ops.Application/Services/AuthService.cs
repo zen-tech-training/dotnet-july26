@@ -45,7 +45,7 @@ public class AuthService : IAuthService
             UserName = user.UserName!,
             Role = user.Role.ToString(),
             Token = token,
-            Expiration = DateTime.UtcNow.AddHours(1)
+            ExpiresOn = DateTime.UtcNow.AddHours(1)
         };
     }
 }
