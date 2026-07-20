@@ -3300,7 +3300,7 @@ appsettings.json
       {
         "Name": "File",
         "Args": {
-          "path": "Logs/log-.txt",
+          "path": "Logs/log-.log",
           "rollingInterval": "Day",
           "retainedFileCountLimit": 30,
           "shared": true
@@ -3601,7 +3601,7 @@ Remove:
 <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
 
 Degrade the version:
-<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 
 
 ==========

@@ -12,8 +12,8 @@ using Ops.Infrastructure.Data;
 namespace Ops.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260716031948_ProductUserAuth")]
-    partial class ProductUserAuth
+    [Migration("20260720041546_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
