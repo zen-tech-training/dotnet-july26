@@ -459,7 +459,7 @@ app
 
 =============================================
 
-Step 3 - Generate Components
+Step 3 - Generate 4 Components
 
 Home
 ng generate component features/home --standalone
@@ -467,6 +467,8 @@ Login
 ng generate component features/auth/login --standalone
 Navbar
 ng generate component shared/components/navbar --standalone
+UserList
+ng g c features/UserList --standalone
 
 
 features

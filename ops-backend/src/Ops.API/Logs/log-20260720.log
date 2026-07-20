@@ -190,3 +190,27 @@ Error Number:18456,State:1,Class:14
 2026-07-20 10:15:44.095 +05:30 [INF] MyMiddlewareTwo - Before next middleware
 2026-07-20 10:15:44.129 +05:30 [INF] MyMiddlewareTwo - After next middleware
 2026-07-20 10:15:44.134 +05:30 [INF] Response 200
+2026-07-20 11:51:19.409 +05:30 [INF] HTTP GET /api/Products
+2026-07-20 11:51:19.646 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-20 11:51:21.901 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-20 11:51:21.904 +05:30 [INF] Response 200
+2026-07-20 11:52:05.475 +05:30 [INF] HTTP POST /api/Products
+2026-07-20 11:52:05.508 +05:30 [INF] Response 401
+2026-07-20 11:53:03.539 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-20 11:53:03.547 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-20 11:53:04.083 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-20 11:53:04.085 +05:30 [INF] Response 200
+2026-07-20 11:53:40.752 +05:30 [INF] HTTP POST /api/Products
+2026-07-20 11:53:40.784 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-20 11:53:41.165 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-20 11:53:41.167 +05:30 [INF] Response 201
+2026-07-20 12:02:25.195 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-20 12:02:25.225 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-20 12:02:25.226 +05:30 [INF] Hosting environment: Development
+2026-07-20 12:02:25.227 +05:30 [INF] Content root path: C:\Users\RB120485\OneDrive - Zensar Technologies Ltd\1OfficeWork-2026\1-Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src\Ops.API
+2026-07-20 12:10:43.666 +05:30 [INF] Application is shutting down...
+2026-07-20 14:20:22.942 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-20 14:20:23.156 +05:30 [INF] Now listening on: http://localhost:6005
+2026-07-20 14:20:24.068 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-20 14:20:24.099 +05:30 [INF] Hosting environment: Development
+2026-07-20 14:20:24.105 +05:30 [INF] Content root path: C:\Users\RB120485\OneDrive - Zensar Technologies Ltd\1OfficeWork-2026\1-Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src\Ops.API
