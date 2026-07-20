@@ -68,83 +68,132 @@ Angular AI Toolkit		None			--
 Your angular application will run on 
 http://localhost:4200/
 
-================================================== Simple API Calls ==============================================
-
-Backend\ Program.cs file
-
-using Microsoft.VisualBasic;
+================================================== API Calls using ASP.NET 10.0 ==============================================
+Backend\ Program.cs
+using Ops.API.Extensions;
+using Ops.API.Middleware;
+using Ops.Application;
+using Ops.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Host.UseSerilog((context, services, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext();
+});
+
+builder.Services.AddApplication();
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.AddSwaggerDocumentation();
+
+builder.Services.AddCorsConfiguration();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
-// 1. Add CORS services and define an "AllowAll" policy
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.WithOrigins("http://127.0.0.1:5500", "http://localhost:5500", "http://localhost:4200")
-            //"file:///D:/Projects/DotNetProjects/1July26-Pool/ops-frontend/basics/")
-             //policy.WithOrigins("http://127.0.0.1:5500") // Replace with your EXACT frontend URL (No trailing slash)
-             //policy.AllowAnyOrigin()
-             .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();  // Required to read the HttpOnly cookie from /v4Get
-    });
-});
+//builder.Services.AddOpenApi();
+
+builder.Services.AddCustomMiddlewares();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseApplicationPipeline();
+
+app.MapApplicationEndpoints();
+
+app.Run();
+
+==========
+
+Backend\ CorsExtensions.cs file
+
+namespace Ops.API.Extensions;
+
+public static class CorsExtensions
 {
-    app.MapOpenApi();
+    public static IServiceCollection AddCorsConfiguration(
+        this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", policy =>
+            {
+                policy.WithOrigins(
+                        "http://127.0.0.1:5500",
+                        "http://localhost:5500",
+                        "http://localhost:4200")
+                //policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+
+                    .AllowAnyMethod()
+
+                    .AllowCredentials(); // Required to read the HttpOnly cookie from /v4Get
+            });
+        });
+
+        return services;
+    }
 }
 
-app.UseHttpsRedirection();
 
-// 2. Enable the defined CORS policy globally
-app.UseCors("AllowAll");
 
-app.UseAuthorization();
+==========
 
-app.MapControllers();
+namespace Ops.API.Extensions;
 
-//https://localhost:6004/
-app.MapGet("/", ()=> "Hello World! "); //HTTP GET - Root Route // Minimal API
-//This get request will be accessible from the browser/ JS/ swagger / Postman API/ Thunder Client
-//To access this web api from the frontend application we need to add CORS in Program.cs file
-
-app.MapGet("/v2Get", () => new { message = "Hello World! "} );
-
-app.MapGet("/v3Get", () => new { message = "Hello World! ", key=123, key2="Some String" });
-
-app.MapGet("/v4Get", (HttpContext context) =>
+public static class EndpointExtensions
 {
-    // 1. Create options for the cookie (Security settings)
-    CookieOptions options = new CookieOptions
+    public static IEndpointRouteBuilder MapApplicationEndpoints(
+        this IEndpointRouteBuilder endpoints)
     {
-        HttpOnly = true,       // Prevents JavaScript from reading the cookie (protects against XSS)
-        //Secure = true,         // Ensures cookie is only sent over HTTPS
-        Secure = false,        // http://localhost:4200
-        SameSite = SameSiteMode.Lax, // Allows cookie to be sent on standard cross-site navigations
-        Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Cookie lifespan
-    };
+        endpoints.MapControllers();
 
-    // 2. Append the cookie to the HTTP response headers
-    context.Response.Cookies.Append("MyUserToken", "SecureValue123", options);
+        endpoints.MapGet("/", () => "OPS API is running...");
 
-    // 3. Return your JSON payload
-    return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
-});
+        endpoints.MapGet("/health", () =>
+        {
+            return Results.Ok(new
+            {
+                Status = "Healthy",
+
+                Time = DateTime.UtcNow
+            });
+        });
+
+        endpoints.MapGet("/v2Get", () => new { message = "Hello World! " });
+
+        endpoints.MapGet("/v3Get", () => new { message = "Hello World! ", key = 123, key2 = "Some String" });
+
+        endpoints.MapGet("/v4Get", (HttpContext context) =>
+        {
+            // 1. Create options for the cookie (Security settings)
+            CookieOptions options = new CookieOptions
+            {
+                HttpOnly = true,       // Prevents JavaScript from reading the cookie (protects against XSS)
+                                       //Secure = true,         // Ensures cookie is only sent over HTTPS
+                Secure = false,        // http://localhost:4200
+                SameSite = SameSiteMode.Lax, // Allows cookie to be sent on standard cross-site navigations
+                Expires = DateTimeOffset.UtcNow.AddMinutes(1) // Cookie lifespan
+            };
+
+            // 2. Append the cookie to the HTTP response headers
+            context.Response.Cookies.Append("MyUserToken", "SecureValue123", options);
+
+            // 3. Return your JSON payload
+            return Results.Ok(new { message = "Hello World! ", key = 123, key2 = "Some String from v4" });
+        });
 
 
-app.Run(); // Run() will be executed only once, when we start the application
-
+        return endpoints;
+    }
+}
 
 =============================================
 //ops-frontend/src/app/app.config.ts
@@ -162,34 +211,26 @@ export const appConfig: ApplicationConfig = {
   ]
 };
 
+
 =============================================
 // src/app/services/api.service.ts
 
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-// Define an interface for your expected JSON shape
 
+// Define an interface for your expected JSON shape
 export interface OpsApiResponse {
   message: string;
   key?: number;
   key2?: string;
 }
 
-//In C# - Interface I1 { ............... }
-//Client Code - I1 iOne;
-
 @Injectable({
   providedIn: 'root' // Makes it a globally accessible singleton service
 })export class ApiService {
   private http = inject(HttpClient);
   private baseUrl = 'https://localhost:6004';
-
-//   int num; // In C#
-//   num: int ; // In TS
-
-//In C#,
-// Method paramaters - DTs, Return type - DT
 
   // Method to fetch data from /v3Get
   getV3Data(): Observable<OpsApiResponse> {
@@ -203,6 +244,7 @@ export interface OpsApiResponse {
     });
   }
 }
+
 =============================================
 //ops-frontend/src/app/component/get-data-from-api/get-data-from-api.ts
 
@@ -241,6 +283,7 @@ export class GetDataFromAPI {
 =============================================
 
 <!-- File: ops-frontend/src/app/component/get-data-from-api/get-data-from-api.html -->
+
 <p>    
     get-data-from-api works!
 </p>
@@ -264,6 +307,7 @@ export class GetDataFromAPI {
     </div>
   }
 
+
 =============================================
 //File path: ops-frontend/src/app/app.ts
 
@@ -284,7 +328,7 @@ export class App {
 
 =============================================
 
-<!-- Filepath: ops-frontend/src/app/app.html -->
+<!-- File path: ops-frontend/src/app/app.html -->
 <main class="main">
   <div class="content">
     <div class="left-side">
@@ -299,3 +343,451 @@ export class App {
   </div>
 </main>
 <router-outlet />
+
+
+=============================================
+Enterprise Folder Structure
+
+src
+ ├── app
+ │
+ ├── core                 <-- Singleton services
+ │     ├── guards
+ │     ├── interceptors
+ │     ├── services
+ │     ├── models
+ │     ├── constants
+ │     └── core.config.ts
+ │
+ ├── shared               <-- reusable UI
+ │     ├── components
+ │     ├── pipes
+ │     ├── directives
+ │     └── material
+ │
+ ├── layouts
+ │     ├── admin-layout
+ │     └── auth-layout
+ │
+ ├── features
+ │
+ │    ├── auth
+ │    │      ├── login
+ │    │      └── auth.service.ts
+ │    │
+ │    └── admin
+ │            ├── dashboard
+ │            ├── users
+ │            ├── products
+ │            └── orders
+ │
+ ├── app.routes.ts
+ │
+ └── environments
+
+
+=============================================
+
+Suggested Development Order:
+
+Angular Material setup
+Folder structure
+Environment configuration
+Login page
+AuthService
+JWT Interceptor
+Auth Guard
+Admin Layout (Toolbar + Sidebar)
+Dashboard
+User List
+Edit User dialog
+Delete User
+Snackbar notifications
+Loading spinner
+Error interceptor
+NgRx integration (later)
+
+
+=============================================
+Step 1 - Install Angular Material
+ng add @angular/material
+
+Type Y and press Enter
+
+Choose
+Theme
+Azure/Blue
+
+
+package.json file
+"@angular/cdk": "^21.2.14",
+"@angular/material": "^21.2.14",
+=============================================
+
+app
+│
+├── core
+│   ├── constants
+│   ├── guards
+│   ├── interceptors
+│   ├── models
+│   └── services
+│
+├── shared
+│   ├── components
+│   	│
+│   	├── navbar
+│   │
+│   └── material
+│
+├── layouts
+│
+├── features
+│   │
+│   ├── home
+│   │
+│   ├── auth
+│   │     └── login
+│   │
+│   └── admin
+│
+├── app.config.ts
+├── app.routes.ts
+├── app.html
+├── app.scss
+└── app.ts
+
+=============================================
+
+Step 3 - Generate Components
+
+Home
+ng generate component features/home --standalone
+Login
+ng generate component features/auth/login --standalone
+Navbar
+ng generate component shared/components/navbar --standalone
+
+
+features
+    home
+        home.ts
+        home.html
+        home.scss
+
+    auth
+        login
+            login.ts
+            login.html
+            login.scss
+
+shared
+    components
+        navbar
+            navbar.ts
+            navbar.html
+            navbar.scss
+
+
+
+# Step 4 - Environment Configuration
+
+Create
+
+```
+src/environments
+```
+
+Inside it
+
+```
+environment.ts
+```
+
+```ts
+export const environment = {
+
+  production: false,
+
+  apiUrl: 'https://localhost:6004/api'
+
+};
+```
+
+Later, every service will use
+
+```ts
+environment.apiUrl
+```
+
+instead of
+
+```ts
+https://localhost:6004/api
+```
+
+---
+
+# Step 5 - Material Module
+
+Create
+
+```
+shared/material/material.ts
+```
+
+```ts
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
+export const MATERIAL_MODULES = [
+
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule
+
+];
+```
+
+Later, every standalone component can simply import:
+
+```ts
+imports: [
+
+...MATERIAL_MODULES
+
+]
+```
+
+As more Material components are needed (table, dialog, form field, sidenav, etc.), we'll add them here.
+
+---
+
+# Step 6 - Configure Routes
+
+Update **app.routes.ts**
+
+```ts
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+
+    {
+        path: '',
+        loadComponent: () =>
+            import('./features/home/home')
+                .then(m => m.Home)
+    },
+
+    {
+        path: 'login',
+        loadComponent: () =>
+            import('./features/auth/login/login')
+                .then(m => m.Login)
+    },
+
+    {
+        path: '**',
+        redirectTo: ''
+    }
+
+];
+```
+
+Current routes
+
+```
+localhost:4200/
+```
+
+↓
+
+Home
+
+---
+
+```
+localhost:4200/login
+```
+
+↓
+
+Login
+
+---
+
+# Step 7 - Root Component
+
+`app.html`
+
+```html
+<app-navbar></app-navbar>
+
+<div class="container">
+
+    <router-outlet></router-outlet>
+
+</div>
+```
+
+Import
+
+```ts
+RouterOutlet
+Navbar
+```
+
+inside `app.ts`.
+
+---
+
+# Step 8 - Navbar
+
+The navbar should be very simple for now.
+
+```
+------------------------------------------------
+
+OPS
+
+Home
+
+Login
+
+------------------------------------------------
+```
+
+Navigation
+
+```
+OPS Logo
+
+↓
+
+Home
+
+↓
+
+Login
+```
+
+Later we'll change it to
+
+```
+Dashboard
+
+Users
+
+Products
+
+Orders
+
+Logout
+```
+
+after authentication.
+
+---
+
+# Step 9 - Home Page
+
+Keep it simple.
+
+```
+-----------------------------------------
+
+Order Processing Solution
+
+Enterprise Application
+
+ASP.NET Core 10
+
+Angular 21
+
+Angular Material
+
+-----------------------------------------
+
+[ Login ]
+
+-----------------------------------------
+```
+
+The Login button should navigate to
+
+```
+/login
+```
+
+---
+
+# Step 10 - Login Page (UI Only)
+
+For now, only build the UI—no API integration yet.
+
+```
+----------------------------
+
+LOGIN
+
+Username
+
+____________________
+
+Password
+
+____________________
+
+Remember Me
+
+[ Login ]
+
+----------------------------
+```
+
+We will connect this form to the backend in the next phase.
+
+---
+
+# Expected Output After Phase 1
+
+When you run:
+
+```bash
+ng serve
+
+=============================================
+
+=============================================
+
+
+Backend has GET request: https://localhost:6004/api/Users
+Response:
+[
+  {
+    "id": 1,
+    "userName": "rupesh",
+    "password": null,
+    "role": 0,
+    "mobileNumber": "1234567890",
+    "email": "rupesh@ops.com"
+  },
+  {
+    "id": 2,
+    "userName": "amit",
+    "password": null,
+    "role": 1,
+    "mobileNumber": "1234567891",
+    "email": "amit"
+  }
+]
+
+
+
+=============================================
+
+
+
+
+=============================================

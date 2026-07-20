@@ -1,0 +1,13 @@
+2026-07-20 07:52:28.471 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-20 07:52:28.585 +05:30 [INF] Now listening on: http://localhost:6005
+2026-07-20 07:52:29.125 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-20 07:52:29.131 +05:30 [INF] Hosting environment: Development
+2026-07-20 07:52:29.135 +05:30 [INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API
+2026-07-20 07:52:54.222 +05:30 [INF] HTTP GET /v3Get
+2026-07-20 07:52:54.386 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-20 07:52:54.407 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-20 07:52:54.410 +05:30 [INF] Response 200
+2026-07-20 07:53:50.802 +05:30 [INF] HTTP GET /api/Users
+2026-07-20 07:53:50.809 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-20 07:53:54.472 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-20 07:53:54.480 +05:30 [INF] Response 200
