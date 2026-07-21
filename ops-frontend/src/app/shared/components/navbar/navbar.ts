@@ -18,6 +18,13 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
-export class Navbar {
+export class Navbar {   //Named export
+
+}
+
+export class SecondNavbar{ }   //Named export
+
+export default class ThirdNavbar{  //Default export
+
 
 }

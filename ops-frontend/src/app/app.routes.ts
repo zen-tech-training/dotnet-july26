@@ -2,7 +2,7 @@
 import { Routes } from '@angular/router';
 export const routes: Routes = [
     {
-        path: '',
+        path: '',  //root route
         loadComponent: () =>
             import('./features/home/home')
                 .then(m => m.Home)
@@ -14,7 +14,7 @@ export const routes: Routes = [
                 .then(m => m.Login)
     },
     {
-        path: '**',
-        redirectTo: ''
+        path: '**',  //It will handle all non matching routes
+        redirectTo: '' //Redirect to root route
     }
 ];
