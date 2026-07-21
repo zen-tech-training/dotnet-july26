@@ -1,0 +1,463 @@
+load-balanced .NET microservices application, needs an API Gateway (like YARP), and a load balancer (e.g., NGINX, Kubernetes, or Docker Swarm). 
+
+MS
+www.shoppy.com
+Login
+1pm
+www.shoppy.com?pid=101
+Add To Cart button => Place Order
+
+Cloud developer will create multiple instances of www.shoppy.com
+
+Can we create separate projects/ Solutions? Yes, with MS.
+
+Login MS - 2 instances - Springboot - 5001
+HomePage MS - 4 instances - php  - 6001
+AddToCart MS - 10 instances - Dotnet - 7001 ===> 7501
+PlaceOrder MS - 10 instances - Dotnet - 8001
+
+Maintenance ====>
+HomePage MS is down - 
+=========================================
+API Gateway - common gateway - MS - running on port 5000
+localhost:5000/login/login
+localhost:5000/homepage
+localhost:5000/AddToCart
+
+========================================= 
+Load balancer
+
+==========================================
+
+Step 1: Create the Solution Structure
+Create a new solution folder:
+
+C:\Projects\DotNetProjects\MS> mkdir LBSols
+
+cd LBSols
+
+C:\Projects\DotNetProjects\MS\LBSols>
+mkdir LBSol1
+mkdir LBSol2
+mkdir LBSol3
+
+cd LBSol1
+dotnet new sln -n LBSol1
+dotnet new webapi -n MS1
+dotnet sln add MS1/MS1.csproj
+cd..
+
+cd LBSol2
+dotnet new sln -n LBSol2
+dotnet new webapi -n MS2
+dotnet sln add MS2/MS2.csproj
+cd..
+
+cd LBSol3
+dotnet new sln -n LBSol3
+dotnet new web -n ApiGateway
+dotnet sln add ApiGateway/ApiGateway.csproj
+cd ApiGateway
+dotnet add package Yarp.ReverseProxy
+
+<PackageReference Include="Yarp.ReverseProxy" Version="2.3.0" />
+
+Ocelot
+
+======================================
+Step 2:
+Open all 3 projects in 3 IDEs, go to the respective sln folder and run below 3 projects
+start LBSol1.sln
+start LBSol2.sln
+start LBSol3.sln
+============================================
+Step 3: launchSettings.json - Configure Microservices for Multiple Instances
+In MS1 and MS2, update launchSettings.json to run on different ports:
+
+File:  LBSol1/MS1/launchSettings.json
+
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      .........................
+      }
+    },
+    "https": {
+      .........................
+      }
+    },
+    "MS1A": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5001",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "MS1B": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5003",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
+
+============================================
+File:  LBSol2/MS2/launchSettings.json
+
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      .......................
+      }
+    },
+    "https": {
+      .......................
+      }
+    },
+    "MS2A": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5004",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "INSTANCE_ID": "MS2-Instance-1"
+      }
+    },
+    "MS2B": {
+      "commandName": "Project",
+      "applicationUrl": "http://localhost:5005",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "INSTANCE_ID": "MS2-Instance-2"
+      }
+    }
+  }
+}
+
+============================================
+File:  LBSol3/ApiGateway/appsettings.json
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ReverseProxy": {
+    "Routes": {
+      "ms1Route": {
+        "ClusterId": "ms1Cluster",
+        "Match": {
+          "Path": "/ms1/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/ms1"
+          }
+        ]
+      },
+      "ms2Route": {
+        "ClusterId": "ms2Cluster",
+        "Match": {
+          "Path": "/ms2/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/ms2"
+          }
+        ]
+      }
+    },
+    "Clusters": {
+      "ms1Cluster": {
+        "Destinations": {
+          "MS1A": { "Address": "http://localhost:5001/" },
+          "MS1B": { "Address": "http://localhost:5003/" }
+        }
+      },
+      "ms2Cluster": {
+        "Destinations": {
+          "MS2A": { "Address": "http://localhost:5004/" },
+          "MS2B": { "Address": "http://localhost:5005/" }
+        }
+      }
+    }
+  }
+}
+
+============================================
+Step 3: 
+
+LBSol1/MS1/Program.cs
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddOpenApi();
+var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+app.UseHttpsRedirection();
+app.MapGet("/", () => "Hello world! from MS1");
+app.MapGet("/lb", () => {
+    var instanceId = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "Unknown Instance";
+    return Results.Content($"<h1> Hello World! From MS1  {instanceId}</h1>", "text /html");
+});
+app.Run(); //https://localhost:5001/openapi/v1.json
+
+
+=================================
+MS1.Controllers\MS1API1Controller.cs
+
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MS1.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]    
+    public class MS1API1Controller : ControllerBase
+    {
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var instanceId = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "Unknown Instance";
+            //return Ok($"MS1 Service - Instance: {instanceId}");
+            return Content($"<h1> MS1 - MS1API1Controller - Instance: {instanceId}</h1>", "text /html");
+        }
+        //public IActionResult Get() => Ok("MS1 Service Response");
+    }
+}
+
+============================================
+LBSol2/MS2/Program.cs
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddOpenApi();
+var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+app.UseHttpsRedirection();
+app.MapGet("/", () => "Hello world! from MS2");
+app.MapGet("/lb", () => {
+    var instanceId = Environment.GetEnvironmentVariable("INSTANCE_ID") ?? "Unknown Instance";
+    return Results.Content($"<h1> Hello World! From MS2  {instanceId}</h1>", "text /html");
+});
+app.Run();
+
+============================================
+LBSol3/ApiGateway/Program.cs
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+var app = builder.Build();
+app.MapReverseProxy();
+//app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => Results.Content("<h1> Hello World! From ApiGateway LB </h1> ", "text /html"));
+app.Run();
+============================================
+
+Step 4: Run the Services
+You can run multiple instances (Run 5 commands from 5 separate terminals):
+
+C:\Projects\DotNetProjects\MS\LB\LBSols\LBSol1> dotnet run --project MS1 --launch-profile MS1A
+C:\Projects\DotNetProjects\MS\LB\LBSols\LBSol1> dotnet run --project MS1 --launch-profile MS1B
+
+C:\Projects\DotNetProjects\MS\LB\LBSols\LBSol2> dotnet run --project MS2 --launch-profile MS2A
+C:\Projects\DotNetProjects\MS\LB\LBSols\LBSol2> dotnet run --project MS2 --launch-profile MS2B
+
+C:\Projects\DotNetProjects\MS\LB\LBSols\LBSol3> dotnet run --project ApiGateway --urls=http://localhost:5000
+
+============================================
+
+Step 5: Test Load Balancing
+Access:
+http://localhost:5001/
+http://localhost:5003/
+http://localhost:5004/
+http://localhost:5005/
+
+http://localhost:5000/
+http://localhost:5000/ms1
+http://localhost:5000/ms2
+
+
+Another route /lb 
+http://localhost:5001/lb
+http://localhost:5003/lb
+http://localhost:5004/lb
+http://localhost:5005/lb
+http://localhost:5000/
+Load Balancing
+http://localhost:5000/ms1/lb  -> Load balanced between 5001 and 5003
+http://localhost:5000/ms2/lb  -> Load balanced between 5004 and 5005
+
+Controller
+http://localhost:5000/ms1/api/MS1API1
+
+From Angular below request
+http://localhost:5000/salary-processor/123456
+API GATEWAY will convert it into
+http://localhost:5004/123456
+
+
+http://localhost:5004/salary-processor/123456
+
+
+============================================
+Step 6: Add Sample Controllers
+
+FilePath: MS1\Controllers\MS1API1Controller.cs
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MS1.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MS1API1Controller : ControllerBase
+    {
+        [HttpGet]
+        //public IActionResult Get()
+        //{
+        //    var instanceId = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "Unknown Instance";
+        //    //return Ok($"MS1 Service - Instance: {instanceId}");
+        //    return Content($"<h1> MS1 - Instance: {instanceId}</h1>", "text /html");
+        //}
+        public IActionResult Get() => Ok("MS1 Service Response");
+    }
+}
+
+
+============================================
+============================================
+============================================
+
+
+
+
+
+FilePath: CustomerMS\Controllers\CustomerController.cs
+
+using Microsoft.AspNetCore.Mvc;
+namespace CustomerMS.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class CustomerController : ControllerBase
+    {
+        [HttpGet]
+        public IActionResult Get()
+        {
+            var instanceId = Environment.GetEnvironmentVariable("INSTANCE_ID") ?? "Unknown Instance";
+            //return Ok($"customer Service - {instanceId}");
+            return Ok(Results.Content($"<h1> CustomerMS Instance:{instanceId}</h1>", "text /html"));
+        }
+        //public IActionResult Get() => Ok("customer Service Response");
+    }
+}
+
+
+
+============================================
+
+Filepath: ProductMS\Program.cs
+
+var builder = WebApplication.CreateBuilder(args);
+// Add services to the container.
+builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+var app = builder.Build();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+app.UseHttpsRedirection();
+app.MapControllers();
+//app.MapGet("/", () => "Hello world! from ProductMS");
+app.MapGet("/", () => {
+    var instanceId = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "Unknown Instance";
+    return Results.Content($"<h1> Hello World! From ProductMS  {instanceId}</h1>", "text /html");
+});
+app.Run();
+
+
+
+
+Filepath: CustomerMS\Program.cs
+
+var builder = WebApplication.CreateBuilder(args);
+// Add services to the container.
+builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+var app = builder.Build();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+app.UseHttpsRedirection();
+app.MapControllers();
+//app.MapGet("/", () => "Hello world! from CustomerMS");
+app.MapGet("/", () => {
+    var instanceId = Environment.GetEnvironmentVariable("INSTANCE_ID") ?? "Unknown Instance";
+    return Results.Content($"<h1> Hello World! From CustomerMS  {instanceId}</h1>", "text /html");
+});
+app.Run();
+
+
+============================================
+
+========
+WIP
+Without Implementing Controller:
+http://localhost:5000/product → Load balanced between 5001 and 5002
+http://localhost:5000/customer → Load balanced between 5003 and 5004
+YARP will round-robin between the instances.
+
+http://localhost:5001/api/product
+http://localhost:5003/api/product
+http://localhost:5000/product/api/product
+http://localhost:5004/customer
+http://localhost:5005/customer
+http://localhost:5000/customer
+
+============================================
+
+ Optional: 
+Dockerize these services and set up Docker Compose for easier orchestration and load balancing.
+Kubernetes for production-grade load balancing.
+
+============================================
+
+Options to implement load balancer without Docker:
+YARP with Multiple Local Instances
+		Development and testing
+		Simulating load balancing locally
+		No need for Docker or container orchestration
+Use IIS or IIS Express for Hosting and Load Balancing - 
+		Use Application Request Routing (ARR) to configure load balancing
+		Set up URL Rewrite rules to route traffic
+Use HAProxy as a Lightweight Load Balancer
+Azure Application Gateway or Azure Load Balancer
+
+
+Approach			Suitable For			Notes
+YARP + Manual Instances		Local dev/test			Follow all above steps
+IIS + ARR			Windows enterprise		GUI-based setup
+HAProxy				Lightweight, cross-platform	Config file-based
+Windows Services		Background management		Manual setup
+Azure Gateway			Cloud deployment		Scalable, managed
+
+	
