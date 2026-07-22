@@ -9,10 +9,17 @@ import { LoginResponse } from '../models/auth/login-response';
   providedIn: 'root'
 })
 export class AuthService extends ApiService {
+  
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(
       `${this.apiUrl}/Auth/login`,
       request
+      // {
+      //   "userName": "user5",
+      //   "password": "123456"
+      // }
     );
   }
 }
+
+//http.post<DataTypeOfResponse>( backendAPI, payload)

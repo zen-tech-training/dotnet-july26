@@ -34,8 +34,8 @@ export class Login {
     private router: Router,
   ) {
     this.loginForm = this.fb.group({
-      userName: ['', [Validators.required]],
-      password: ['', [Validators.required]],
+      userName: ['user5', [Validators.required]],
+      password: ['123456', [Validators.required]],
       rememberMe: [false],
     });
   }
@@ -50,8 +50,9 @@ export class Login {
         console.log(response);
         alert('Login Successful');
         localStorage.setItem('token', response.token);
+        localStorage.setItem('new', 'some random data');
         setTimeout(() => {
-          this.router.navigate(['/admin']);
+          this.router.navigate(['/']);
         }, 3000);
       },
       error: (error) => {
