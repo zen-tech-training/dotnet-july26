@@ -1,5 +1,7 @@
 //File: src/app/app.routes.ts
 import { Routes } from '@angular/router';
+import { Login } from './features/auth/login/login';
+
 export const routes: Routes = [
     {
         path: '',  //root route
@@ -9,12 +11,11 @@ export const routes: Routes = [
     },
     {
         path: 'login',
-        loadComponent: () =>
-            import('./features/auth/login/login')
-                .then(m => m.Login)
+        // loadComponent: () =>import('./features/auth/login/login').then(m => m.Login)
+        component: Login
     },
     {
-        path: '**',  //It will handle all non matching routes
+        path: '**',    //It will handle all non matching routes
         redirectTo: '' //Redirect to root route
     }
 ];

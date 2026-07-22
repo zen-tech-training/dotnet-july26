@@ -538,23 +538,25 @@ As more Material components are needed (table, dialog, form field, sidenav, etc.
 
 Update app.routes.ts:
 
+//File: src/app/app.routes.ts
 import { Routes } from '@angular/router';
+import { Login } from './features/auth/login/login';
+
 export const routes: Routes = [
     {
-        path: '',
+        path: '',  //root route
         loadComponent: () =>
             import('./features/home/home')
                 .then(m => m.Home)
     },
     {
         path: 'login',
-        loadComponent: () =>
-            import('./features/auth/login/login')
-                .then(m => m.Login)
+        // loadComponent: () =>import('./features/auth/login/login').then(m => m.Login)
+        component: Login
     },
     {
-        path: '**',
-        redirectTo: ''
+        path: '**',    //It will handle all non matching routes
+        redirectTo: '' //Redirect to root route
     }
 ];
 
@@ -900,11 +902,13 @@ h3 {
 # 6. Route
 //File: src/app/app.routes.ts
 
+import { Login } from './features/auth/login/login';
+
+
 {
         path: 'login',
-        loadComponent: () =>
-            import('./features/auth/login/login')
-                .then(m => m.Login)
+        // loadComponent: () =>import('./features/auth/login/login').then(m => m.Login)
+        component: Login
 },
 
 
