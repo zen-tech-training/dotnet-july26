@@ -1105,9 +1105,245 @@ Response:
 
 
 
+============================================= Role Based Access - Authorization
+
+| Role                  | View Products       | Create                | Edit     | Delete   |
+| --------------------- | ------------------- | --------------------- | -------- | -------- |
+| Guest (Not Logged In) | ❌ Redirect to Login | ❌                     | ❌        | ❌        |
+| User                  | ✅                   | ❌ Hidden              | ❌ Hidden | ❌ Hidden |
+| Admin                 | ✅                   | ✅ (Top & Bottom only) | ✅        | ✅        |
+| SuperUser             | ✅                   | ✅ (Top & Bottom only) | ✅        | ✅        |
+
+
+
+
+
 =============================================
 
 
+                    Login
+                      │
+                      ▼
+                 AuthService
+                      │
+                      ▼
+                JWT Token Received
+                      │
+                      ▼
+              TokenStorageService
+                      │
+                      ▼
+             HTTP Auth Interceptor
+                      │
+      Automatically adds Bearer Token
+                      │
+                      ▼
+      ProductService / UserService / OrderService
+                      │
+                      ▼
+             ASP.NET Core API
+
+
+=============================================
+
+Folder Structure
+core
+│
+├── interceptors
+│      auth.interceptor.ts
+│
+├── services
+│      api.service.ts
+│      auth.service.ts
+│      token-storage.service.ts
+
+
+=============================================
+
+//File path: src/app/core/services/token-storage.service.ts
+
+import { Injectable } from '@angular/core';
+@Injectable({
+  providedIn: 'root'
+})
+export class TokenStorageService {
+  private readonly TOKEN_KEY = 'token';
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+  setToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
+  clear(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+  }
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+}
+=============================================
+
+//File path: src/app/core/interceptors/auth.interceptor.ts
+
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { TokenStorageService } from '../services/token-storage.service';
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const tokenService = inject(TokenStorageService);
+  const token = tokenService.getToken();
+  if (!token) {
+    return next(req);
+  }
+  const clonedRequest = req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  return next(clonedRequest);
+};
+
+=============================================
+
+//ops-frontend/src/app/app.config.ts
+
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes),
+    // provideHttpClient() // Required for API calls
+    provideHttpClient(withInterceptors([authInterceptor])),
+  ],
+};
+
+
+=============================================
+
+//File: src/app/features/auth/login/login.ts
+
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../../core/services/auth.service';
+import { Router } from '@angular/router';
+import { TokenStorageService } from '../../../core/services/token-storage.service';           // Added
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    MatCardModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatIconModule,
+  ],
+  templateUrl: './login.html',
+  styleUrl: './login.scss',
+})
+export class Login {
+  hidePassword = true;
+  loginForm: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private tokenStorage: TokenStorageService,                       // Added
+    private router: Router,
+  ) {
+    this.loginForm = this.fb.group({
+      userName: ['user5', [Validators.required]],
+      password: ['123456', [Validators.required]],
+      rememberMe: [false],
+    });
+  }
+  onSubmit(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+    const request = this.loginForm.value;
+    this.authService.login(request).subscribe({
+      next: (response) => {
+        console.log(response);
+        alert('Login Successful');
+        // localStorage.setItem('token', response.token);
+        this.tokenStorage.setToken(response.token);                    // Added
+        // localStorage.setItem('new', 'some random data');
+        setTimeout(() => {
+          this.router.navigate(['/']);
+        }, 3000);
+      },
+      error: (error) => {
+        console.error(error);
+        alert('Invalid Username or Password');
+      },
+    });
+  }
+
+  logout() {                                                            // Added
+    this.tokenStorage.clear();
+    this.router.navigate(['/login']);
+  }
+}
+
+=============================================
+
+<!-- Filepath: ops-frontend/src/app/app.html -->
+
+<main class="main">
+  <div class="content">
+    <div class="left-side">
+      <h1>Welcome to {{ title() }}</h1>
+      <p>Easy OPS</p>
+    </div>
+    <app-navbar></app-navbar>
+    <app-user-list/>
+    <app-get-data-from-api></app-get-data-from-api>
+    <!-- 
+    <hr />
+    <div class="divider" role="separator" aria-label="Divider">
+      <app-get-data-from-api></app-get-data-from-api>
+    </div>     -->
+  </div>
+</main>
+<router-outlet />
+
+=============================================
+ng s
+
+Check the API calls by clicking "Fetch Data from API" button from get-data-from-api component.
+
+Inspect the request and check the Authorization header, you will see the bearer token.
+
+=============================================
+=============================================
+
+=============================================
+
+
+=============================================
+
+
+=============================================
+
+=============================================
+
+=============================================
+
+
+=============================================
 
 
 =============================================

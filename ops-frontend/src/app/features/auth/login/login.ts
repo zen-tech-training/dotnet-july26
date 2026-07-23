@@ -9,6 +9,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
+import { TokenStorageService } from '../../../core/services/token-storage.service';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -31,6 +32,7 @@ export class Login {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private tokenStorage: TokenStorageService,
     private router: Router,
   ) {
     this.loginForm = this.fb.group({
@@ -49,8 +51,9 @@ export class Login {
       next: (response) => {
         console.log(response);
         alert('Login Successful');
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('new', 'some random data');
+        // localStorage.setItem('token', response.token);
+        this.tokenStorage.setToken(response.token);
+        // localStorage.setItem('new', 'some random data');
         setTimeout(() => {
           this.router.navigate(['/']);
         }, 3000);
@@ -60,5 +63,10 @@ export class Login {
         alert('Invalid Username or Password');
       },
     });
+  }
+
+  logout() {
+    this.tokenStorage.clear();
+    this.router.navigate(['/login']);
   }
 }

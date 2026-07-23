@@ -43,7 +43,7 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin,SuperUser")]
     [HttpPost]
     public async Task<IActionResult> Create(
         CreateProductDto dto,
@@ -60,7 +60,7 @@ public class ProductsController : ControllerBase
             product);
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin,SuperUser")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
@@ -75,7 +75,7 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin,SuperUser")]
     [HttpPatch("{id:int}")]
     public async Task<IActionResult> Patch(
         int id,
