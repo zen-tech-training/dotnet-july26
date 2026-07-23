@@ -1,0 +1,110 @@
+// File: src/app/component/decode-jwt-token/decode-jwt-token.scss
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.action-row {
+  display: flex;
+  gap: 12px; // Creates a clean gap between decode and delete buttons
+  margin-bottom: 8px;
+}
+
+
+.profile-card {
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+
+  mat-card-header {
+    margin-bottom: 16px;
+  }
+}
+
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  border-radius: 50%;
+  
+  mat-icon {
+    font-size: 40px;
+    height: 40px;
+    width: 40px;
+    color: #616161;
+  }
+}
+
+.profile-content {
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  mat-icon {
+    font-size: 24px;
+    color: #757575;
+  }
+}
+
+.info-text {
+  display: flex;
+  flex-direction: column;
+
+  .label {
+    font-size: 12px;
+    color: #757575;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #212121;
+  }
+
+  .badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: inline-block;
+    width: fit-content;
+    
+    &.admin {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+    &.superuser {
+      background-color: #fff3e0;
+      color: #ef6c00;
+    }
+  }
+}
+
+.error-card {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  color: #757575;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+  }
+}

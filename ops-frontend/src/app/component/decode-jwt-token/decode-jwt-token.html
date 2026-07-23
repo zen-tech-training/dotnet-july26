@@ -1,0 +1,58 @@
+<!-- File: src/app/component/decode-jwt-token/decode-jwt-token.html -->
+<div class="container">
+  
+  <!-- Action Button Row -->
+  <div class="action-row">
+    <button mat-raised-button color="primary" (click)="decodeToken()">
+      <mat-icon>lock_open</mat-icon>
+      Decode Token
+    </button>
+
+    <!-- Delete Token Action Button (Disables if no token exists) -->
+    <button mat-stroked-button color="warn" (click)="deleteToken()" [disabled]="!isLoggedIn">
+      <mat-icon>delete_forever</mat-icon>
+      Delete Token
+    </button>
+  </div>
+
+  <!-- Profile Card Interface (Shows only if logged in) -->
+  @if (isLoggedIn) {
+    <mat-card class="profile-card">
+      <mat-card-header>
+        <div mat-card-avatar class="profile-avatar">
+          <mat-icon>account_circle</mat-icon>
+        </div>
+        <mat-card-title>{{ userName }}</mat-card-title>
+        <mat-card-subtitle>User Profile Information</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-divider></mat-divider>
+
+      <mat-card-content class="profile-content">
+        <div class="info-item">
+          <mat-icon color="action">fingerprint</mat-icon>
+          <div class="info-text">
+            <span class="label">User ID</span>
+            <span class="value">{{ userId }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon color="action">admin_panel_settings</mat-icon>
+          <div class="info-text">
+            <span class="label">Assigned Role</span>
+            <span class="value badge" [ngClass]="role.toLowerCase()">{{ role }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <mat-icon color="warn">warning</mat-icon>
+        <p>No valid user token detected. Click the button above to decode.</p>
+      </mat-card-content>
+    </mat-card>
+  }
+
+</div>

@@ -6,6 +6,7 @@ import { Navbar } from './shared/components/navbar/navbar';
 import ThirdNavbarAlias  from './shared/components/navbar/navbar';
 import { UserList } from './features/user-list/user-list';
 import { BindingDemo } from './component/binding-demo/binding-demo';
+import { DecodeJwtToken } from './component/decode-jwt-token/decode-jwt-token';
 
 // import { something } from 'pathOfTsFile'
 // import something from 'pathOfTsFile;
@@ -13,7 +14,7 @@ import { BindingDemo } from './component/binding-demo/binding-demo';
 //Component decorator
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, GetDataFromAPI, Navbar, UserList, BindingDemo],
+  imports: [RouterOutlet, GetDataFromAPI, Navbar, UserList, BindingDemo, DecodeJwtToken],
   // template: `<h1>App Inline Component</h1>`, //Inline componnet; back tick is present just below to ESC button
   templateUrl: './app.html', 
   styleUrl: './app.scss'

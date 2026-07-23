@@ -60,3 +60,32 @@ System.UnauthorizedAccessException: Invalid username or password.
 2026-07-23 08:22:30.161 +05:30 [INF] MyMiddlewareTwo - After next middleware
 2026-07-23 08:22:30.172 +05:30 [INF] Response 200
 2026-07-23 08:41:31.709 +05:30 [INF] Application is shutting down...
+2026-07-23 22:16:50.254 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-23 22:16:50.472 +05:30 [INF] Now listening on: http://localhost:6005
+2026-07-23 22:16:51.765 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-23 22:16:51.805 +05:30 [INF] Hosting environment: Development
+2026-07-23 22:16:51.814 +05:30 [INF] Content root path: C:\Projects\dotnet\dotnet-july26\ops-backend\src\Ops.API
+2026-07-23 22:20:20.705 +05:30 [INF] HTTP GET /api/Users
+2026-07-23 22:20:20.875 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 22:20:24.446 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 22:20:24.450 +05:30 [INF] Response 200
+2026-07-23 22:20:49.751 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 22:20:49.979 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 22:20:50.881 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 22:20:50.887 +05:30 [INF] Response 200
+2026-07-23 22:24:43.755 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 22:24:44.026 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 22:24:44.801 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 22:24:44.809 +05:30 [INF] Response 200
+2026-07-23 22:28:05.198 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 22:28:05.271 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 22:28:05.785 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 22:28:05.788 +05:30 [INF] Response 200
+2026-07-23 22:49:44.774 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 22:49:44.834 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 22:49:45.643 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 22:49:45.645 +05:30 [INF] Response 200
+2026-07-23 22:57:48.666 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 22:57:48.707 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 22:57:49.124 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 22:57:49.130 +05:30 [INF] Response 200
