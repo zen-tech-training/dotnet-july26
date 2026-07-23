@@ -19,3 +19,10 @@ export const routes: Routes = [
         redirectTo: '' //Redirect to root route
     }
 ];
+
+
+//loadComponent vs loadChildren
+//ProfileComponent vs AdminDashboardComponent
+
+//                 vs AdminRoutes.ts file will have Admin related Componnets and their Routes
+//                 vs www.abc.com/admin

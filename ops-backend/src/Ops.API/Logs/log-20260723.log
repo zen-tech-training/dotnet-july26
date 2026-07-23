@@ -1,0 +1,60 @@
+2026-07-23 09:38:52.780 +05:30 [INF] Now listening on: https://localhost:6004
+2026-07-23 09:38:52.819 +05:30 [INF] Application started. Press Ctrl+C to shut down.
+2026-07-23 09:38:52.822 +05:30 [INF] Hosting environment: Development
+2026-07-23 09:38:52.824 +05:30 [INF] Content root path: C:\Users\RB120485\OneDrive - Zensar Technologies Ltd\1OfficeWork-2026\1-Projects\DotNetProjects\1July26-Pool\dotnet-july26\ops-backend\src\Ops.API
+2026-07-23 09:45:10.318 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 09:45:10.636 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 09:45:16.216 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 09:45:16.227 +05:30 [INF] Response 200
+2026-07-23 09:47:36.412 +05:30 [INF] HTTP GET /v3Get
+2026-07-23 09:47:36.476 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 09:47:36.499 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 09:47:36.502 +05:30 [INF] Response 200
+2026-07-23 09:48:32.084 +05:30 [INF] HTTP GET /v3Get
+2026-07-23 09:48:32.101 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 09:48:32.112 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 09:48:32.115 +05:30 [INF] Response 200
+2026-07-23 10:03:10.215 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 10:03:10.220 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:03:10.672 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:03:10.674 +05:30 [INF] Response 200
+2026-07-23 10:04:40.132 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 10:04:40.136 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:04:40.347 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:04:40.350 +05:30 [INF] Response 200
+2026-07-23 10:05:51.784 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 10:05:51.788 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:05:51.954 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:05:51.956 +05:30 [INF] Response 200
+2026-07-23 10:09:39.953 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 10:09:39.963 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:09:40.160 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:09:40.164 +05:30 [INF] Response 200
+2026-07-23 10:10:50.910 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 10:10:50.923 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:10:51.074 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:10:51.077 +05:30 [INF] Response 200
+2026-07-23 10:28:37.338 +05:30 [INF] HTTP GET /v3Get
+2026-07-23 10:28:37.342 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:28:37.347 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:28:37.348 +05:30 [INF] Response 200
+2026-07-23 10:30:47.394 +05:30 [INF] HTTP GET /v3Get
+2026-07-23 10:30:47.399 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:30:47.408 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:30:47.414 +05:30 [INF] Response 200
+2026-07-23 10:32:29.607 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 10:32:29.643 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:32:30.039 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:32:30.042 +05:30 [INF] Response 200
+2026-07-23 10:32:58.936 +05:30 [INF] HTTP GET /v3Get
+2026-07-23 10:32:58.941 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:32:58.950 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:32:58.952 +05:30 [INF] Response 200
+2026-07-23 10:33:49.085 +05:30 [INF] HTTP POST /api/Auth/login
+2026-07-23 10:33:49.091 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:33:49.274 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:33:49.275 +05:30 [INF] Response 200
+2026-07-23 10:34:28.979 +05:30 [INF] HTTP GET /v3Get
+2026-07-23 10:34:28.990 +05:30 [INF] MyMiddlewareTwo - Before next middleware
+2026-07-23 10:34:28.996 +05:30 [INF] MyMiddlewareTwo - After next middleware
+2026-07-23 10:34:29.001 +05:30 [INF] Response 200
