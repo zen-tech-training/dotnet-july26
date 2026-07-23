@@ -58,3 +58,4 @@
 2026-07-23 10:34:28.990 +05:30 [INF] MyMiddlewareTwo - Before next middleware
 2026-07-23 10:34:28.996 +05:30 [INF] MyMiddlewareTwo - After next middleware
 2026-07-23 10:34:29.001 +05:30 [INF] Response 200
+2026-07-23 16:52:04.450 +05:30 [INF] Application is shutting down...
