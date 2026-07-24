@@ -1380,6 +1380,9 @@ Is SuperUser
 Can Manage Products
 
 =============================================
+
+JWT - Header.Payload.Signature
+
 core
 │
 ├── models

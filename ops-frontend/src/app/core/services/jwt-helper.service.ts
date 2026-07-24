@@ -6,7 +6,9 @@ import { TokenStorageService } from './token-storage.service';
   providedIn: 'root',
 })
 export class JwtHelperService {
+  
   constructor(private tokenStorage: TokenStorageService) {}
+
   getToken(): string | null {
     return this.tokenStorage.getToken();
   }
@@ -14,7 +16,7 @@ export class JwtHelperService {
     const token = this.getToken();
     if (!token) return null;
     try {
-      const payload = token.split('.')[1];
+      const payload = token.split('.')[1]; // "Header.Payload.Signature" ==> Payload
       const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
       return JSON.parse(json);
     } catch {
